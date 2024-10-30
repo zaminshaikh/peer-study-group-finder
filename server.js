@@ -147,7 +147,9 @@ app.post('/api/register', async (req, res, next) =>
 { 
   const { FirstName, LastName, Login, Password } = req.body;
 
-  const newUser = {FirstName:FirstName,LastName:LastName,Login:Login,Password:Password,Group:{}};
+  const emptyArray = [];
+
+  const newUser = {FirstName:FirstName,LastName:LastName,Login:Login,Password:Password,Group:emptyArray};
   var error = '';
 
   try
