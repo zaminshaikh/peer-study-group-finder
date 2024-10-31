@@ -21,7 +21,7 @@ const LoginPage = () => {
   return (
     <div
       className="min-h-screen bg-gradient-to-br 
-      from-gray-900 via-green-900 to-emerald-900 flex items-center
+      from-gray-900 via-yellow-900 to-yellow-600 flex items-center
       justify-center relative overflow-hidden"
     >
       <motion.div
@@ -53,7 +53,7 @@ const LoginPage = () => {
             <div className="flex items-center mb-6">
               <Link
                 to="/forgot-password"
-                className="text-sm text-green-400 hover:underline"
+                className="text-sm text-gray-100 hover:underline"
               >
                 Forgot Password?
               </Link>
