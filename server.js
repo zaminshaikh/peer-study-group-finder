@@ -115,11 +115,62 @@ const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
 client.connect();
 
+app.post('/api/login', async (req, res, next) => 
+{
+  // incoming: login, password
+  // outgoing: id, firstName, lastName, error
+  
+  var error = '';
+
+  const { Login, Password } = req.body;
+
+  const db = client.db('PeerGroupFinder');
+  const results = await db.collection('Users').find({Login:Login,Password:Password}).toArray();
+
+  var id = -1;
+  var fn = '';
+  var ln = '';
+
+  if( results.length > 0 )
+  {
+    id = results[0].UserId;
+    fn = results[0].FirstName;
+    ln = results[0].LastName;
+  }
+
+  var ret = { id:id, firstName:fn, lastName:ln, error:''};
+  res.status(200).json(ret);
+});
+
+
+app.post('/api/register', async (req, res, next) =>
+{ 
+  const { FirstName, LastName, Login, Password } = req.body;
+
+  const emptyArray = [];
+
+  const newUser = {FirstName:FirstName,LastName:LastName,Login:Login,Password:Password,Group:emptyArray};
+  var error = '';
+
+  try
+  {
+    const db = client.db('PeerGroupFinder');
+    const result = db.collection('Users').insertOne(newUser);
+  }
+  catch(e)
+  {
+    error = e.toString();
+  }
+
+  var ret = { error: error };
+  res.status(200).json(ret);
+});
+
 app.post('/api/addcard', async (req, res, next) =>
 {
   // incoming: userId, color
   // outgoing: error
-	
+  
   const { userId, card } = req.body;
 
   const newCard = {Card:card,UserId:userId};
@@ -141,32 +192,6 @@ app.post('/api/addcard', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-app.post('/api/login', async (req, res, next) => 
-{
-  // incoming: login, password
-  // outgoing: id, firstName, lastName, error
-	
- var error = '';
-
-  const { login, password } = req.body;
-
-  const db = client.db('COP4331');
-  const results = await db.collection('Users').find({Login:login,Password:password}).toArray();
-
-  var id = -1;
-  var fn = '';
-  var ln = '';
-
-  if( results.length > 0 )
-  {
-    id = results[0].UserId;
-    fn = results[0].FirstName;
-    ln = results[0].LastName;
-  }
-
-  var ret = { id:id, firstName:fn, lastName:ln, error:''};
-  res.status(200).json(ret);
-});
 
 app.post('/api/searchcards', async (req, res, next) => 
 {
