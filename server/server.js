@@ -109,8 +109,11 @@ var cardList =
   'Babe Ruth'
 ];
 
-require('dotenv').config();
+require('dotenv').config( { path: '../.env' }); // Expects .env file to be one level above this file.
 const url = process.env.MONGODB_URL;
+if (!url) {
+  console.error('MONGODB_URL is not defined in the environment variables.');
+}
 const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
 client.connect();
