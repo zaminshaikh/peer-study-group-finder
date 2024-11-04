@@ -175,27 +175,27 @@ app.post('/api/register', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-app.post('/api/addcard', async (req, res, next) =>
+app.post('/api/addgroup', async (req, res, next) =>
 {
   // incoming: userId, color
   // outgoing: error
-  
-  const { userId, card } = req.body;
+	
+  const { Class, name, owner, expiry, link, modality, description, students } = req.body;
 
-  const newCard = {Card:card,UserId:userId};
+  const newCard = {Class:Class, Owner:owner, Name:name, Expiry:expiry, Link:link, Modality:modality, Description:description, Students:students};
   var error = '';
 
   try
   {
-    const db = client.db('COP4331');
-    const result = db.collection('Cards').insertOne(newCard);
+    const db = client.db('PeerGroupFinder');
+    const result = db.collection('Groups').insertOne(newCard);
   }
   catch(e)
   {
     error = e.toString();
   }
 
-  cardList.push( card );
+  // cardList.push( card );
 
   var ret = { error: error };
   res.status(200).json(ret);
@@ -225,6 +225,36 @@ app.post('/api/searchcards', async (req, res, next) =>
   var ret = {results:_ret, error:error};
   res.status(200).json(ret);
 });
+
+app.post('/api/joingroup', async (req, res, next) => 
+  {
+    // incoming: userId, name
+    // outgoing: error
+    
+   var error = '';
+  
+    const { userId, name } = req.body;
+  
+    try {
+      const db = client.db('PeerGroupFinder');
+
+      const result = await db.collection('Users').updateOne(
+        {UserId: userId},
+        {$addToSet: {Groups: name}}
+      );
+
+      const result2 = await db.collection('Groups').updateOne(
+        {Name: name},
+        {$addToSet: {Students: userId}}
+      );
+    }
+    catch {
+      error = e.toString();
+    }
+    
+    var ret = {error:''};
+    res.status(200).json(ret);
+  });
 
 app.use((req, res, next) => 
 {
