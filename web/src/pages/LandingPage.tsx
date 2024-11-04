@@ -12,7 +12,7 @@ const LandingPage = () => {
     navigate("/signup");
   };
 
-  const oraclesRef = useRef<HTMLDivElement>(null);
+  // const oraclesRef = useRef<HTMLDivElement>(null);
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const magnetoRef = useRef<HTMLDivElement>(null);
 

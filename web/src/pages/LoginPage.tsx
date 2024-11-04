@@ -13,10 +13,12 @@ const LoginPage = () => {
     e.preventDefault();
   };
 
+  /*
   function doLogin() {
     // send request with specified headers
     // read response
   }
+  */
 
   return (
     <div
