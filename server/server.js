@@ -175,7 +175,7 @@ app.post('/api/register', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-app.post('/api/addcard', async (req, res, next) =>
+app.post('/api/addgroup', async (req, res, next) =>
 {
   // incoming: userId, color
   // outgoing: error
