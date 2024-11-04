@@ -1,6 +1,8 @@
 // lib/auth/login_page.dart
 import 'package:flutter/material.dart';
 import 'package:mobile/components/custom_text_field.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 
 class LoginPage extends StatefulWidget {
@@ -13,8 +15,51 @@ class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void handleLogin() {
-    // Implement login logic
+    void handleLogin() async {
+    const String apiUrl = 'http://10.0.2.2:8000/api/login';
+
+  
+    final Map<String, dynamic> requestBody = {
+      'Email': emailController.text,
+      'Password': passwordController.text,
+    };
+  
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+  
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+  
+        if (responseData['error'] == '') {
+          // Login successful
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Login successful')),
+          );
+          // Navigate to the home page or dashboard
+          Navigator.pushNamed(context, '/home');
+        } else {
+          // Show error message from the server
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(responseData['error'])),
+          );
+        }
+      } else {
+        // Handle server error
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Server error. Please try again later.')),
+        );
+      }
+    } catch (e) {
+      // Handle network error
+      if (!mounted) {return;}
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Network error. Please check your connection.')),
+      );
+    }
   }
 
   @override

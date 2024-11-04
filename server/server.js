@@ -240,4 +240,6 @@ app.use((req, res, next) =>
   next();
 });
 
-app.listen(5000); // start Node + Express server on port 5000
+app.listen(8000, () => {
+  console.log('Express server running on http://localhost:8000');
+});
