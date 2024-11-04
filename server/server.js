@@ -109,7 +109,7 @@ var cardList =
   'Babe Ruth'
 ];
 
-require('dotenv').config();
+require('dotenv').config({path:'../.env'});
 const url = process.env.MONGODB_URL;
 const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
@@ -122,10 +122,10 @@ app.post('/api/login', async (req, res, next) =>
   
   var error = '';
 
-  const { Login, Password } = req.body;
+  const { Email, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Login:Login,Password:Password}).toArray();
+  const results = await db.collection('Users').find({Email:Email,Password:Password}).toArray();
 
   var id = -1;
   var fn = '';
@@ -145,16 +145,25 @@ app.post('/api/login', async (req, res, next) =>
 
 app.post('/api/register', async (req, res, next) =>
 { 
-  const { FirstName, LastName, Login, Password } = req.body;
+  const { FirstName, LastName, DisplayName, Email, Password } = req.body;
 
   const emptyArray = [];
-
-  const newUser = {FirstName:FirstName,LastName:LastName,Login:Login,Password:Password,Group:emptyArray};
   var error = '';
+
+  const db = client.db('PeerGroupFinder');
+  const results = await db.collection('Users').find({Email:Email}).toArray();
+
+  if(results.length > 0){
+    error = 'Email already in use';
+    var ret = { error: error };
+    res.status(200).json(ret);
+    return;
+  }
+
+  const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray};
 
   try
   {
-    const db = client.db('PeerGroupFinder');
     const result = db.collection('Users').insertOne(newUser);
   }
   catch(e)
