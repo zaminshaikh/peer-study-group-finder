@@ -153,9 +153,9 @@ app.post('/api/register', async (req, res, next) =>
   const db = client.db('PeerGroupFinder');
   const results = await db.collection('Users').find({Email:Email}).toArray();
 
-  if(results.length > 0){
-    error = 'Email already in use';
-    var ret = { error: error };
+  var isEmailInUse = results.length > 0;
+  if(isEmailInUse){
+    var ret = { emailAlreadyUsed: true, error: error };
     res.status(200).json(ret);
     return;
   }
@@ -171,7 +171,7 @@ app.post('/api/register', async (req, res, next) =>
     error = e.toString();
   }
 
-  var ret = { error: error };
+  var ret = { emailAlreadyUsed: false, error: error };
   res.status(200).json(ret);
 });
 
@@ -180,9 +180,10 @@ app.post('/api/addgroup', async (req, res, next) =>
   // incoming: userId, color
   // outgoing: error
 	
-  const { Class, name, owner, expiry, link, modality, description, students } = req.body;
+  const { Class, Name, Owner, Expiry, Link, Modality, Description} = req.body;
 
-  const newCard = {Class:Class, Owner:owner, Name:name, Expiry:expiry, Link:link, Modality:modality, Description:description, Students:students};
+  const students = [Owner];
+  const newCard = {Class:Class, Name:Name, Owner:Owner, Expiry:Expiry, Link:Link, Modality:Modality, Description:Description, Students:students};
   var error = '';
 
   try
@@ -212,9 +213,9 @@ app.post('/api/searchgroups', async (req, res, next) =>
 
   var error = '';
 
-  const { userId, search } = req.body;
+  const { UserId, Search } = req.body;
 
-  var _search = search.trim();
+  var _search = Search.trim();
   
   const db = client.db('PeerGroupFinder');
   const results = await db.collection('Groups').find({"Class":{$regex:_search+'.*', $options:'i'}}).toArray();
