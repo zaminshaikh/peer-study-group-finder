@@ -202,10 +202,13 @@ app.post('/api/addgroup', async (req, res, next) =>
 });
 
 
-app.post('/api/searchcards', async (req, res, next) => 
+app.post('/api/searchgroups', async (req, res, next) => 
 {
   // incoming: userId, search
   // outgoing: results[], error
+
+  // Currently uses Leinecker's searchcards outline, so searches through each group for the specified class.
+  // Could be changed to search for the class and return the array of groups that belong to the class.
 
   var error = '';
 
@@ -213,13 +216,13 @@ app.post('/api/searchcards', async (req, res, next) =>
 
   var _search = search.trim();
   
-  const db = client.db('COP4331');
-  const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*', $options:'i'}}).toArray();
+  const db = client.db('PeerGroupFinder');
+  const results = await db.collection('Groups').find({"Class":{$regex:_search+'.*', $options:'i'}}).toArray();
   
   var _ret = [];
   for( var i=0; i<results.length; i++ )
   {
-    _ret.push( results[i].Card );
+    _ret.push( results[i].Name );
   }
   
   var ret = {results:_ret, error:error};
