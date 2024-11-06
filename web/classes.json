@@ -1,0 +1,452 @@
+{
+  "departments": [
+    {
+      "subject_code": "CS",
+      "name": "Computer Science",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Programming" },
+        { "code": "2101", "title": "Data Structures" },
+        { "code": "3101", "title": "Algorithms" },
+        { "code": "3205", "title": "Software Engineering" },
+        { "code": "3307", "title": "Computer Architecture" },
+        { "code": "3451", "title": "Database Systems" },
+        { "code": "4535", "title": "Artificial Intelligence" },
+        { "code": "4751", "title": "Machine Learning" },
+        { "code": "4801", "title": "Cybersecurity" },
+        { "code": "4901", "title": "Advanced Topics in CS" }
+      ]
+    },
+    {
+      "subject_code": "BIO",
+      "name": "Biology",
+      "courses": [
+        { "code": "1101", "title": "General Biology I" },
+        { "code": "1102", "title": "General Biology II" },
+        { "code": "2201", "title": "Genetics" },
+        { "code": "2301", "title": "Cell Biology" },
+        { "code": "3101", "title": "Ecology" },
+        { "code": "3203", "title": "Evolutionary Biology" },
+        { "code": "4301", "title": "Molecular Biology" },
+        { "code": "4501", "title": "Microbiology" },
+        { "code": "4601", "title": "Biotechnology" },
+        { "code": "4801", "title": "Neurobiology" }
+      ]
+    },
+    {
+      "subject_code": "BA",
+      "name": "Business Administration",
+      "courses": [
+        { "code": "2001", "title": "Introduction to Business" },
+        { "code": "3001", "title": "Principles of Management" },
+        { "code": "3101", "title": "Marketing" },
+        { "code": "3201", "title": "Financial Accounting" },
+        { "code": "3301", "title": "Managerial Accounting" },
+        { "code": "3401", "title": "Business Ethics" },
+        { "code": "3501", "title": "International Business" },
+        { "code": "3601", "title": "Entrepreneurship" },
+        { "code": "3701", "title": "Operations Management" },
+        { "code": "3801", "title": "Strategic Management" }
+      ]
+    },
+    {
+      "subject_code": "ENG",
+      "name": "Engineering",
+      "courses": [
+        { "code": "1010", "title": "Engineering Fundamentals" },
+        { "code": "2010", "title": "Statics" },
+        { "code": "2020", "title": "Dynamics" },
+        { "code": "3010", "title": "Thermodynamics" },
+        { "code": "3020", "title": "Fluid Mechanics" },
+        { "code": "3100", "title": "Electrical Circuits" },
+        { "code": "3200", "title": "Materials Science" },
+        { "code": "3300", "title": "Control Systems" },
+        { "code": "3400", "title": "Structural Analysis" },
+        { "code": "3500", "title": "Environmental Engineering" }
+      ]
+    },
+    {
+      "subject_code": "PSY",
+      "name": "Psychology",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Psychology" },
+        { "code": "2101", "title": "Developmental Psychology" },
+        { "code": "2201", "title": "Cognitive Psychology" },
+        { "code": "3101", "title": "Social Psychology" },
+        { "code": "3201", "title": "Abnormal Psychology" },
+        { "code": "3301", "title": "Personality Psychology" },
+        { "code": "3401", "title": "Industrial-Organizational Psychology" },
+        { "code": "3501", "title": "Clinical Psychology" },
+        { "code": "3601", "title": "Forensic Psychology" },
+        { "code": "3701", "title": "Health Psychology" }
+      ]
+    },
+    {
+      "subject_code": "MTH",
+      "name": "Mathematics",
+      "courses": [
+        { "code": "1101", "title": "Calculus I" },
+        { "code": "1102", "title": "Calculus II" },
+        { "code": "2101", "title": "Linear Algebra" },
+        { "code": "2201", "title": "Differential Equations" },
+        { "code": "3101", "title": "Abstract Algebra" },
+        { "code": "3201", "title": "Real Analysis" },
+        { "code": "3301", "title": "Probability Theory" },
+        { "code": "3401", "title": "Numerical Methods" },
+        { "code": "3501", "title": "Discrete Mathematics" },
+        { "code": "3601", "title": "Topology" }
+      ]
+    },
+    {
+      "subject_code": "CHE",
+      "name": "Chemistry",
+      "courses": [
+        { "code": "1101", "title": "General Chemistry I" },
+        { "code": "1102", "title": "General Chemistry II" },
+        { "code": "2101", "title": "Organic Chemistry I" },
+        { "code": "2102", "title": "Organic Chemistry II" },
+        { "code": "3101", "title": "Physical Chemistry" },
+        { "code": "3201", "title": "Analytical Chemistry" },
+        { "code": "3301", "title": "Inorganic Chemistry" },
+        { "code": "3401", "title": "Biochemistry" },
+        { "code": "3501", "title": "Environmental Chemistry" },
+        { "code": "3601", "title": "Polymer Chemistry" }
+      ]
+    },
+    {
+      "subject_code": "POL",
+      "name": "Political Science",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Political Science" },
+        { "code": "2101", "title": "American Government" },
+        { "code": "2201", "title": "Comparative Politics" },
+        { "code": "3101", "title": "International Relations" },
+        { "code": "3201", "title": "Political Theory" },
+        { "code": "3301", "title": "Public Administration" },
+        { "code": "3401", "title": "Political Economy" },
+        { "code": "3501", "title": "Public Policy" },
+        { "code": "3601", "title": "Political Behavior" },
+        { "code": "3701", "title": "Legislative Processes" }
+      ]
+    },
+    {
+      "subject_code": "ART",
+      "name": "Art and Design",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Art" },
+        { "code": "2101", "title": "Drawing I" },
+        { "code": "2201", "title": "Painting I" },
+        { "code": "3101", "title": "Sculpture" },
+        { "code": "3201", "title": "Graphic Design" },
+        { "code": "3301", "title": "Photography" },
+        { "code": "3401", "title": "Digital Media" },
+        { "code": "3501", "title": "Art History" },
+        { "code": "3601", "title": "Ceramics" },
+        { "code": "3701", "title": "Printmaking" }
+      ]
+    },
+    {
+      "subject_code": "HIS",
+      "name": "History",
+      "courses": [
+        { "code": "1101", "title": "World History I" },
+        { "code": "1102", "title": "World History II" },
+        { "code": "2101", "title": "American History I" },
+        { "code": "2102", "title": "American History II" },
+        { "code": "2201", "title": "European History" },
+        { "code": "3101", "title": "Asian History" },
+        { "code": "3201", "title": "African History" },
+        { "code": "3301", "title": "Middle Eastern History" },
+        { "code": "3401", "title": "Latin American History" },
+        { "code": "3501", "title": "Historiography" }
+      ]
+    },
+    {
+      "subject_code": "EDU",
+      "name": "Education",
+      "courses": [
+        { "code": "1101", "title": "Foundations of Education" },
+        { "code": "2101", "title": "Educational Psychology" },
+        { "code": "2201", "title": "Curriculum Development" },
+        { "code": "3101", "title": "Educational Technology" },
+        { "code": "3201", "title": "Special Education" },
+        { "code": "3301", "title": "Assessment and Evaluation" },
+        { "code": "3401", "title": "Classroom Management" },
+        { "code": "3501", "title": "Higher Education Administration" },
+        { "code": "3601", "title": "Instructional Strategies" },
+        { "code": "3701", "title": "Educational Leadership" }
+      ]
+    },
+    {
+      "subject_code": "NUR",
+      "name": "Nursing",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Nursing" },
+        { "code": "2101", "title": "Pathophysiology" },
+        { "code": "2201", "title": "Pharmacology for Nurses" },
+        { "code": "3101", "title": "Adult Health Nursing" },
+        { "code": "3201", "title": "Pediatric Nursing" },
+        { "code": "3301", "title": "Mental Health Nursing" },
+        { "code": "3401", "title": "Maternal-Child Nursing" },
+        { "code": "3501", "title": "Community Health Nursing" },
+        { "code": "3601", "title": "Nursing Leadership" },
+        { "code": "3701", "title": "Advanced Nursing Practices" }
+      ]
+    },
+    {
+      "subject_code": "PHI",
+      "name": "Philosophy",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Philosophy" },
+        { "code": "2101", "title": "Ethics" },
+        { "code": "2201", "title": "Logic" },
+        { "code": "3101", "title": "Metaphysics" },
+        { "code": "3201", "title": "Epistemology" },
+        { "code": "3301", "title": "Philosophy of Mind" },
+        { "code": "3401", "title": "Political Philosophy" },
+        { "code": "3501", "title": "Philosophy of Science" },
+        { "code": "3601", "title": "Existentialism" },
+        { "code": "3701", "title": "Philosophy of Religion" }
+      ]
+    },
+    {
+      "subject_code": "LAW",
+      "name": "Legal Studies",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Law" },
+        { "code": "2101", "title": "Constitutional Law" },
+        { "code": "2201", "title": "Criminal Law" },
+        { "code": "3101", "title": "Civil Procedure" },
+        { "code": "3201", "title": "International Law" },
+        { "code": "3301", "title": "Business Law" },
+        { "code": "3401", "title": "Environmental Law" },
+        { "code": "3501", "title": "Intellectual Property Law" },
+        { "code": "3601", "title": "Family Law" },
+        { "code": "3701", "title": "Labor Law" }
+      ]
+    },
+    {
+      "subject_code": "SOC",
+      "name": "Sociology",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Sociology" },
+        { "code": "2101", "title": "Social Theory" },
+        { "code": "2201", "title": "Sociological Research Methods" },
+        { "code": "3101", "title": "Urban Sociology" },
+        { "code": "3201", "title": "Rural Sociology" },
+        { "code": "3301", "title": "Sociology of Education" },
+        { "code": "3401", "title": "Medical Sociology" },
+        { "code": "3501", "title": "Criminology" },
+        { "code": "3601", "title": "Sociology of Gender" },
+        { "code": "3701", "title": "Sociology of Race and Ethnicity" }
+      ]
+    },
+    {
+      "subject_code": "PHO",
+      "name": "Photography",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Photography" },
+        { "code": "2101", "title": "Digital Photography" },
+        { "code": "2201", "title": "Portrait Photography" },
+        { "code": "3101", "title": "Studio Lighting" },
+        { "code": "3201", "title": "Photojournalism" },
+        { "code": "3301", "title": "Fine Art Photography" },
+        { "code": "3401", "title": "Photography Theory" },
+        { "code": "3501", "title": "Advanced Digital Imaging" },
+        { "code": "3601", "title": "Commercial Photography" },
+        { "code": "3701", "title": "Documentary Photography" }
+      ]
+    },
+    {
+      "subject_code": "MUS",
+      "name": "Music",
+      "courses": [
+        { "code": "1101", "title": "Music Theory I" },
+        { "code": "1102", "title": "Music Theory II" },
+        { "code": "2101", "title": "History of Western Music" },
+        { "code": "2201", "title": "Jazz Studies" },
+        { "code": "3101", "title": "Composition I" },
+        { "code": "3201", "title": "Composition II" },
+        { "code": "3301", "title": "Conducting" },
+        { "code": "3401", "title": "Music Technology" },
+        { "code": "3501", "title": "Ethnomusicology" },
+        { "code": "3601", "title": "Music Performance" }
+      ]
+    },
+    {
+      "subject_code": "ARTS",
+      "name": "Art Studies",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Art Studies" },
+        { "code": "2101", "title": "Art Criticism" },
+        { "code": "2201", "title": "Contemporary Art" },
+        { "code": "3101", "title": "Art and Society" },
+        { "code": "3201", "title": "Museum Studies" },
+        { "code": "3301", "title": "Art Conservation" },
+        { "code": "3401", "title": "Art Law" },
+        { "code": "3501", "title": "Public Art" },
+        { "code": "3601", "title": "Art Therapy" },
+        { "code": "3701", "title": "Visual Culture" }
+      ]
+    },
+    {
+      "subject_code": "THE",
+      "name": "Theatre",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Theatre" },
+        { "code": "2101", "title": "Acting I" },
+        { "code": "2201", "title": "Acting II" },
+        { "code": "3101", "title": "Directing" },
+        { "code": "3201", "title": "Stage Design" },
+        { "code": "3301", "title": "Theatre Production" },
+        { "code": "3401", "title": "Playwriting" },
+        { "code": "3501", "title": "Theatre History" },
+        { "code": "3601", "title": "Advanced Acting" },
+        { "code": "3701", "title": "Musical Theatre" }
+      ]
+    },
+    {
+      "subject_code": "ECON",
+      "name": "Economics",
+      "courses": [
+        { "code": "1101", "title": "Principles of Microeconomics" },
+        { "code": "1102", "title": "Principles of Macroeconomics" },
+        { "code": "2101", "title": "Intermediate Microeconomics" },
+        { "code": "2201", "title": "Intermediate Macroeconomics" },
+        { "code": "3101", "title": "Econometrics" },
+        { "code": "3201", "title": "International Economics" },
+        { "code": "3301", "title": "Development Economics" },
+        { "code": "3401", "title": "Labor Economics" },
+        { "code": "3501", "title": "Public Economics" },
+        { "code": "3601", "title": "Financial Economics" }
+      ]
+    },
+    {
+      "subject_code": "LIT",
+      "name": "Literature",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Literature" },
+        { "code": "2101", "title": "American Literature" },
+        { "code": "2201", "title": "British Literature" },
+        { "code": "3101", "title": "World Literature" },
+        { "code": "3201", "title": "Modernist Literature" },
+        { "code": "3301", "title": "Postcolonial Literature" },
+        { "code": "3401", "title": "Literary Theory" },
+        { "code": "3501", "title": "Shakespearean Studies" },
+        { "code": "3601", "title": "Contemporary Literature" },
+        { "code": "3701", "title": "Creative Writing" }
+      ]
+    },
+    {
+      "subject_code": "PHYS",
+      "name": "Physics",
+      "courses": [
+        { "code": "1101", "title": "General Physics I" },
+        { "code": "1102", "title": "General Physics II" },
+        { "code": "2101", "title": "Modern Physics" },
+        { "code": "2201", "title": "Classical Mechanics" },
+        { "code": "3101", "title": "Electromagnetism" },
+        { "code": "3201", "title": "Quantum Mechanics" },
+        { "code": "3301", "title": "Thermodynamics" },
+        { "code": "3401", "title": "Optics" },
+        { "code": "3501", "title": "Astrophysics" },
+        { "code": "3601", "title": "Particle Physics" }
+      ]
+    },
+    {
+      "subject_code": "HUM",
+      "name": "Humanities",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Humanities" },
+        { "code": "2101", "title": "Philosophical Thought" },
+        { "code": "2201", "title": "Cultural Studies" },
+        { "code": "3101", "title": "Ethics in Humanities" },
+        { "code": "3201", "title": "Human Rights" },
+        { "code": "3301", "title": "Comparative Religion" },
+        { "code": "3401", "title": "Gender Studies" },
+        { "code": "3501", "title": "Media Studies" },
+        { "code": "3601", "title": "Artistic Expression" },
+        { "code": "3701", "title": "Globalization and Society" }
+      ]
+    },
+    {
+      "subject_code": "BIOE",
+      "name": "Biomedical Engineering",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Biomedical Engineering" },
+        { "code": "2101", "title": "Biomaterials" },
+        { "code": "2201", "title": "Biomedical Instrumentation" },
+        { "code": "3101", "title": "Biomechanics" },
+        { "code": "3201", "title": "Biomedical Imaging" },
+        { "code": "3301", "title": "Tissue Engineering" },
+        { "code": "3401", "title": "Biomedical Signal Processing" },
+        { "code": "3501", "title": "Rehabilitation Engineering" },
+        { "code": "3601", "title": "Biomedical Optics" },
+        { "code": "3701", "title": "Neural Engineering" }
+      ]
+    },
+    {
+      "subject_code": "GEO",
+      "name": "Geology",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Geology" },
+        { "code": "2101", "title": "Mineralogy" },
+        { "code": "2201", "title": "Petrology" },
+        { "code": "3101", "title": "Sedimentology" },
+        { "code": "3201", "title": "Structural Geology" },
+        { "code": "3301", "title": "Paleontology" },
+        { "code": "3401", "title": "Geomorphology" },
+        { "code": "3501", "title": "Hydrogeology" },
+        { "code": "3601", "title": "Environmental Geology" },
+        { "code": "3701", "title": "Geophysical Methods" }
+      ]
+    },
+    {
+      "subject_code": "ANT",
+      "name": "Anthropology",
+      "courses": [
+        { "code": "1101", "title": "Cultural Anthropology" },
+        { "code": "1102", "title": "Biological Anthropology" },
+        { "code": "2101", "title": "Archaeology" },
+        { "code": "2201", "title": "Linguistic Anthropology" },
+        { "code": "3101", "title": "Medical Anthropology" },
+        { "code": "3201", "title": "Anthropological Theory" },
+        { "code": "3301", "title": "Urban Anthropology" },
+        { "code": "3401", "title": "Environmental Anthropology" },
+        { "code": "3501", "title": "Economic Anthropology" },
+        { "code": "3601", "title": "Political Anthropology" }
+      ]
+    },
+    {
+      "subject_code": "ENV",
+      "name": "Environmental Science",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Environmental Science" },
+        { "code": "2101", "title": "Environmental Chemistry" },
+        { "code": "2201", "title": "Ecology and Conservation" },
+        { "code": "3101", "title": "Environmental Policy" },
+        { "code": "3201", "title": "Sustainable Development" },
+        { "code": "3301", "title": "Climate Change" },
+        { "code": "3401", "title": "Environmental Impact Assessment" },
+        { "code": "3501", "title": "Renewable Energy Systems" },
+        { "code": "3601", "title": "Water Resources Management" },
+        { "code": "3701", "title": "Waste Management" }
+      ]
+    },
+    {
+      "subject_code": "LING",
+      "name": "Linguistics",
+      "courses": [
+        { "code": "1101", "title": "Introduction to Linguistics" },
+        { "code": "2101", "title": "Phonetics" },
+        { "code": "2201", "title": "Syntax" },
+        { "code": "3101", "title": "Semantics" },
+        { "code": "3201", "title": "Pragmatics" },
+        { "code": "3301", "title": "Sociolinguistics" },
+        { "code": "3401", "title": "Psycholinguistics" },
+        { "code": "3501", "title": "Historical Linguistics" },
+        { "code": "3601", "title": "Computational Linguistics" },
+        { "code": "3701", "title": "Language Acquisition" }
+      ]
+    }
+  ]
+}
