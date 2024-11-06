@@ -6,109 +6,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-var cardList = 
-[
-  'Roy Campanella',
-  'Paul Molitor',
-  'Tony Gwynn',
-  'Dennis Eckersley',
-  'Reggie Jackson',
-  'Gaylord Perry',
-  'Buck Leonard',
-  'Rollie Fingers',
-  'Charlie Gehringer',
-  'Wade Boggs',
-  'Carl Hubbell',
-  'Dave Winfield',
-  'Jackie Robinson',
-  'Ken Griffey, Jr.',
-  'Al Simmons',
-  'Chuck Klein',
-  'Mel Ott',
-  'Mark McGwire',
-  'Nolan Ryan',
-  'Ralph Kiner',
-  'Yogi Berra',
-  'Goose Goslin',
-  'Greg Maddux',
-  'Frankie Frisch',
-  'Ernie Banks',
-  'Ozzie Smith',
-  'Hank Greenberg',
-  'Kirby Puckett',
-  'Bob Feller',
-  'Dizzy Dean',
-  'Joe Jackson',
-  'Sam Crawford',
-  'Barry Bonds',
-  'Duke Snider',
-  'George Sisler',
-  'Ed Walsh',
-  'Tom Seaver',
-  'Willie Stargell',
-  'Bob Gibson',
-  'Brooks Robinson',
-  'Steve Carlton',
-  'Joe Medwick',
-  'Nap Lajoie',
-  'Cal Ripken, Jr.',
-  'Mike Schmidt',
-  'Eddie Murray',
-  'Tris Speaker',
-  'Al Kaline',
-  'Sandy Koufax',
-  'Willie Keeler',
-  'Pete Rose',
-  'Robin Roberts',
-  'Eddie Collins',
-  'Lefty Gomez',
-  'Lefty Grove',
-  'Carl Yastrzemski',
-  'Frank Robinson',
-  'Juan Marichal',
-  'Warren Spahn',
-  'Pie Traynor',
-  'Roberto Clemente',
-  'Harmon Killebrew',
-  'Satchel Paige',
-  'Eddie Plank',
-  'Josh Gibson',
-  'Oscar Charleston',
-  'Mickey Mantle',
-  'Cool Papa Bell',
-  'Johnny Bench',
-  'Mickey Cochrane',
-  'Jimmie Foxx',
-  'Jim Palmer',
-  'Cy Young',
-  'Eddie Mathews',
-  'Honus Wagner',
-  'Paul Waner',
-  'Grover Alexander',
-  'Rod Carew',
-  'Joe DiMaggio',
-  'Joe Morgan',
-  'Stan Musial',
-  'Bill Terry',
-  'Rogers Hornsby',
-  'Lou Brock',
-  'Ted Williams',
-  'Bill Dickey',
-  'Christy Mathewson',
-  'Willie McCovey',
-  'Lou Gehrig',
-  'George Brett',
-  'Hank Aaron',
-  'Harry Heilmann',
-  'Walter Johnson',
-  'Roger Clemens',
-  'Ty Cobb',
-  'Whitey Ford',
-  'Willie Mays',
-  'Rickey Henderson',
-  'Babe Ruth'
-];
-
 require('dotenv').config({path:'../.env'});
 const url = process.env.MONGODB_URL;
 const MongoClient = require('mongodb').MongoClient;
@@ -130,15 +27,17 @@ app.post('/api/login', async (req, res, next) =>
   var id = -1;
   var fn = '';
   var ln = '';
+  let displayName = '';
 
   if( results.length > 0 )
   {
     id = results[0].UserId;
     fn = results[0].FirstName;
     ln = results[0].LastName;
+    displayName = results[0].DisplayName;
   }
 
-  var ret = { id:id, firstName:fn, lastName:ln, error:''};
+  var ret = { id:id, firstName:fn, lastName:ln, displayName:displayName, error:''};
   res.status(200).json(ret);
 });
 
@@ -153,9 +52,9 @@ app.post('/api/register', async (req, res, next) =>
   const db = client.db('PeerGroupFinder');
   const results = await db.collection('Users').find({Email:Email}).toArray();
 
-  if(results.length > 0){
-    error = 'Email already in use';
-    var ret = { error: error };
+  var isEmailInUse = results.length > 0;
+  if(isEmailInUse){
+    var ret = { emailAlreadyUsed: true, error: error };
     res.status(200).json(ret);
     return;
   }
@@ -171,60 +70,114 @@ app.post('/api/register', async (req, res, next) =>
     error = e.toString();
   }
 
-  var ret = { error: error };
+  var ret = { emailAlreadyUsed: false, error: error };
   res.status(200).json(ret);
 });
 
-app.post('/api/addcard', async (req, res, next) =>
+app.post('/api/addgroup', async (req, res, next) =>
 {
   // incoming: userId, color
   // outgoing: error
-  
-  const { userId, card } = req.body;
+	
+  const { Class, Name, Owner, Size, Link, Modality, Description} = req.body;
 
-  const newCard = {Card:card,UserId:userId};
+  const students = [Owner];
+  const newCard = {Class:Class, Name:Name, Owner:Owner, Size:Size, Link:Link, Modality:Modality, Description:Description, Students:students};
   var error = '';
 
   try
   {
-    const db = client.db('COP4331');
-    const result = db.collection('Cards').insertOne(newCard);
+    const db = client.db('PeerGroupFinder');
+    const result = db.collection('Groups').insertOne(newCard);
   }
   catch(e)
   {
     error = e.toString();
   }
 
-  cardList.push( card );
+  // cardList.push( card );
 
   var ret = { error: error };
   res.status(200).json(ret);
 });
 
 
-app.post('/api/searchcards', async (req, res, next) => 
+app.get('/api/getgroupdetails', async (req, res, next) => {
+  const { name } = req.query;
+
+  const db = client.db('PeerGroupFinder');
+  const group = await db.collection('Groups').findOne({ Name: name });
+
+  if (!group) {
+    res.status(404).json({ error: 'Group not found' });
+    return;
+  }
+
+  res.status(200).json({
+    description: group.Description,
+    class: group.Class,
+    size: group.Size,
+    modality: group.Modality,
+    createdAt: group.createdAt,
+  });
+});
+
+app.post('/api/searchgroups', async (req, res, next) => 
 {
   // incoming: userId, search
   // outgoing: results[], error
 
+  // Currently uses Leinecker's searchcards outline, so searches through each group for the specified class.
+  // Could be changed to search for the class and return the array of groups that belong to the class.
+
   var error = '';
 
-  const { userId, search } = req.body;
+  const { UserId, Search } = req.body;
 
-  var _search = search.trim();
+  var _search = Search.trim();
   
-  const db = client.db('COP4331');
-  const results = await db.collection('Cards').find({"Card":{$regex:_search+'.*', $options:'i'}}).toArray();
+  const db = client.db('PeerGroupFinder');
+  const results = await db.collection('Groups').find({"Class":{$regex:_search+'.*', $options:'i'}}).toArray();
   
   var _ret = [];
   for( var i=0; i<results.length; i++ )
   {
-    _ret.push( results[i].Card );
+    _ret.push( results[i].Name );
   }
   
   var ret = {results:_ret, error:error};
   res.status(200).json(ret);
 });
+
+app.post('/api/joingroup', async (req, res, next) => 
+  {
+    // incoming: userId, name
+    // outgoing: error
+    
+   var error = '';
+  
+    const { userId, name } = req.body;
+  
+    try {
+      const db = client.db('PeerGroupFinder');
+
+      const result = await db.collection('Users').updateOne(
+        {UserId: userId},
+        {$addToSet: {Groups: name}}
+      );
+
+      const result2 = await db.collection('Groups').updateOne(
+        {Name: name},
+        {$addToSet: {Students: userId}}
+      );
+    }
+    catch {
+      error = e.toString();
+    }
+    
+    var ret = {error:''};
+    res.status(200).json(ret);
+  });
 
 app.use((req, res, next) => 
 {
@@ -240,4 +193,4 @@ app.use((req, res, next) =>
   next();
 });
 
-app.listen(5001); // start Node + Express server on port 5000
+app.listen(5000); // start Node + Express server on port 5000
