@@ -30,6 +30,7 @@ const LoginPage = () => {
       setError(data.error);
     } else {
       // Handle successful registration (e.g., redirect to login or show success message)
+      localStorage.setItem("displayName", data.displayName);
       console.log("Login successful:", data);
       navigate("/");
     }
