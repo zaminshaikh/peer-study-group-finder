@@ -201,6 +201,7 @@ app.post('/api/addgroup', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
+// module.exports = app;
 
 app.post('/api/searchgroups', async (req, res, next) => 
 {
@@ -273,4 +274,6 @@ app.use((req, res, next) =>
   next();
 });
 
-app.listen(5000); // start Node + Express server on port 5000
+const server = app.listen(5000); // start Node + Express server on port 5000
+
+module.exports = { app, server };
