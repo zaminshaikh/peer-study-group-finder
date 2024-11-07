@@ -28,7 +28,7 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
       {groups.map((group) => (
         <div
           key={group.id}
-          className={`bg-white rounded-lg shadow-lg p-6 transition-all duration-300 cursor-pointer ${
+          className={`bg-white rounded-lg w-full shadow-lg p-6 transition-all duration-300 cursor-pointer ${
             selectedGroup?.id === group.id
               ? "bg-yellow-100"
               : "hover:bg-yellow-100"
