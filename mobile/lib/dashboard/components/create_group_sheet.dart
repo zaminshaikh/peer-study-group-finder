@@ -16,6 +16,10 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
   final nameController = TextEditingController();
   final classController = TextEditingController();
   final descriptionController = TextEditingController();
+  final sizeController = TextEditingController();
+  final modalityController = TextEditingController();
+  final locationController = TextEditingController();
+  final meetingTimeController = TextEditingController();
   bool isSubmitting = false;
 
   void createGroup() async {
@@ -24,10 +28,9 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
 
       try {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        int? userId = prefs.getInt('userId');
+        String? userId = prefs.getString('userId');
 
         if (userId == null) {
-          // Handle null userId
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('User not logged in')),
           );
@@ -39,17 +42,29 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
           Uri.parse('http://10.0.2.2:8000/api/addgroup'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
-            'Class': classController.text,
             'Name': nameController.text,
-            'Owner': userId,
             'Description': descriptionController.text,
-            // Add other fields as necessary
+            'Class': classController.text,
+            'Owner': userId,
+            'Size': int.parse(sizeController.text),
+            'Modality': modalityController.text,
+            'Location': locationController.text,
+            'MeetingTime': meetingTimeController.text,
           }),
         );
 
-        // ... existing code ...
+        if (response.statusCode == 200) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Group created successfully')),
+          );
+        } else {
+          throw Exception('Failed to create group');
+        }
       } catch (e) {
-        // ... existing error handling ...
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred: $e')),
+        );
       } finally {
         setState(() => isSubmitting = false);
       }
@@ -76,7 +91,8 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
                 children: [
                   TextFormField(
                     controller: nameController,
-                    decoration: const InputDecoration(labelText: 'Group Name'),
+                    decoration:
+                        const InputDecoration(labelText: 'Group Name'),
                     validator: (value) =>
                         value!.isEmpty ? 'Group name is required' : null,
                   ),
@@ -90,10 +106,40 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: descriptionController,
-                    decoration: const InputDecoration(labelText: 'Description'),
+                    decoration:
+                        const InputDecoration(labelText: 'Description'),
                     validator: (value) =>
                         value!.isEmpty ? 'Description is required' : null,
                     maxLines: 3,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: sizeController,
+                    decoration:
+                        const InputDecoration(labelText: 'Group Size'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) =>
+                        value!.isEmpty ? 'Size is required' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: modalityController,
+                    decoration:
+                        const InputDecoration(labelText: 'Modality'),
+                    validator: (value) =>
+                        value!.isEmpty ? 'Modality is required' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: locationController,
+                    decoration:
+                        const InputDecoration(labelText: 'Location'),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: meetingTimeController,
+                    decoration:
+                        const InputDecoration(labelText: 'Meeting Time'),
                   ),
                   const SizedBox(height: 24),
                   isSubmitting
