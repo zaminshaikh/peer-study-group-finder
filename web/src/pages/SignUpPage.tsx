@@ -6,13 +6,39 @@ import { Link } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrength";
 
 const SignUpPage = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [FirstName, setFirstName] = useState("");
+  const [LastName, setLastName] = useState("");
+  const [DisplayName, setDisplayName] = useState("");
+  const [Email, setEmail] = useState("");
+  const [Password, setPassword] = useState("");
 
-  const handleSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Name:", name);
+    try {
+      const response = await fetch("http://localhost:5001/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          FirstName: FirstName,
+          LastName: LastName,
+          DisplayName: DisplayName,
+          Email: Email,
+          Password: Password,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.error) {
+        setError(data.error);
+      } else {
+        console.log("User registered successfully");
+      }
+    } catch (err) {
+      setError("An error occurred during registration.");
+      console.error(err);
+    }
   };
 
   return (
@@ -35,25 +61,39 @@ const SignUpPage = () => {
             <Input
               Icon={User}
               type="text"
-              placeholder="Full Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder="First Name"
+              value={FirstName}
+              onChange={(e) => setFirstName(e.target.value)}
+            />
+            <Input
+              Icon={User}
+              type="text"
+              placeholder="Last Name"
+              value={LastName}
+              onChange={(e) => setLastName(e.target.value)}
+            />
+            <Input
+              Icon={User}
+              type="text"
+              placeholder="Display Name"
+              value={DisplayName}
+              onChange={(e) => setDisplayName(e.target.value)}
             />
             <Input
               Icon={Mail}
               type="email"
               placeholder="Email Address"
-              value={email}
+              value={Email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <Input
               Icon={Lock}
               type="password"
               placeholder="Password"
-              value={password}
+              value={Password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <PasswordStrengthMeter password={password} />
+            <PasswordStrengthMeter password={Password} />
             <motion.button
               type="submit"
               className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-700 text-white
@@ -82,3 +122,6 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
+function setError(error: any) {
+  throw new Error("Function not implemented.");
+}
