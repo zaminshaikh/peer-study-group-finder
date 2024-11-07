@@ -4,7 +4,7 @@
     "description": "",
     "main": "server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "jest --detectOpenHandles",
         "start": "nodemon server.js"
     },
     "author": "",
@@ -17,6 +17,11 @@
         "mongodb": "^5.9.2"
     },
     "devDependencies": {
-        "nodemon": "^3.1.7"
+        "nodemon": "^3.1.7",
+        "mongodb": "^5.9.2",
+        "supertest": "^7.0.0"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
     }
 }
