@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../components/custom_text_field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class SignUpPage extends StatefulWidget {
@@ -18,63 +19,70 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void handleSignUp() async {
     const String apiUrl = 'http://10.0.2.2:8000/api/register';
-  
+
     final Map<String, dynamic> requestBody = {
       'FirstName': nameController.text.split(' ').first,
-      'LastName': nameController.text.split(' ').last,
+      'LastName': nameController.text.contains(' ')
+          ? nameController.text.split(' ').last
+          : '',
       'DisplayName': nameController.text,
       'Email': emailController.text,
       'Password': passwordController.text,
     };
-  
-    debugPrint('Starting sign-up process...');
-    debugPrint('Request Body: ${jsonEncode(requestBody)}');
-  
+
     try {
-      debugPrint('Sending POST request to $apiUrl');
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-  
-      debugPrint('Received response with status code: ${response.statusCode}');
-      debugPrint('Response Body: ${response.body}');
-  
+
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         debugPrint('Parsed Response Data: $responseData');
-  
+
         if (responseData['error'] == '') {
-          debugPrint('Registration successful for email: ${emailController.text}');
+          debugPrint(
+              'Registration successful for email: ${emailController.text}');
           // Registration successful
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration successful')),
           );
-          Navigator.pushNamed(context, '/login');
+
+          // Store userId for later use
+          String userId = responseData['UserId'];
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userId', userId);
+
+          // Navigate to the dashboard
+          Navigator.pushNamed(context, '/dashboard');
         } else {
-          debugPrint('Registration failed with error: ${responseData['error']}');
+          debugPrint(
+              'Registration failed with error: ${responseData['error']}');
           // Show error message from the server
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(responseData['error'])),
           );
         }
       } else {
-        debugPrint('Server returned an error. Status Code: ${response.statusCode}');
+        debugPrint(
+            'Server returned an error. Status Code: ${response.statusCode}');
         // Handle server error
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server error. Please try again later.')),
+          const SnackBar(
+              content: Text('Server error. Please try again later.')),
         );
       }
     } catch (e) {
       debugPrint('Network error occurred: $e');
       // Handle network error
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Network error. Please check your connection.')),
+        const SnackBar(
+            content: Text('Network error. Please check your connection.')),
       );
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final headlineStyle = Theme.of(context).textTheme.displayLarge;

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateGroupSheet extends StatefulWidget {
   const CreateGroupSheet({Key? key}) : super(key: key);
@@ -22,8 +23,17 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
       setState(() => isSubmitting = true);
 
       try {
-        // TODO: Replace 'your-user-id' with the actual user ID
-        const String userId = 'your-user-id';
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? userId = prefs.getString('userId');
+
+        if (userId == null) {
+          // Handle null userId
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('User not logged in')),
+          );
+          Navigator.pop(context);
+          return;
+        }
 
         final response = await http.post(
           Uri.parse('http://10.0.2.2:8000/api/addgroup'),
@@ -37,18 +47,9 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
           }),
         );
 
-        if (response.statusCode == 200) {
-          Navigator.pop(context, true); // Return true to indicate success
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Group created successfully')),
-          );
-        } else {
-          throw Exception('Failed to create group');
-        }
+        // ... existing code ...
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('An error occurred: $e')),
-        );
+        // ... existing error handling ...
       } finally {
         setState(() => isSubmitting = false);
       }

@@ -1,6 +1,7 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/dashboard/dashboard.dart';
 
 import 'auth/login.dart';
 import 'auth/onboarding.dart';
@@ -84,6 +85,7 @@ class StudyHiveApp extends StatelessWidget {
         '/': (context) => const OnboardingPage(),
         '/signup': (context) => const SignUpPage(),
         '/login': (context) => const LoginPage(),
+        '/dashboard': (context) => const DashboardPage(),
       },
     );
   }
