@@ -5,7 +5,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
   @override
@@ -50,9 +49,9 @@ class _SignUpPageState extends State<SignUpPage> {
           );
 
           // Store userId for later use
-          String userId = responseData['UserId'];
+          int userId = responseData['UserId'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('userId', userId);
+          await prefs.setInt('userId', userId);
 
           // Navigate to the dashboard
           Navigator.pushNamed(context, '/dashboard');
@@ -82,7 +81,7 @@ class _SignUpPageState extends State<SignUpPage> {
       );
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final headlineStyle = Theme.of(context).textTheme.displayLarge;
@@ -94,8 +93,7 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

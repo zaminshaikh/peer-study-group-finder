@@ -24,7 +24,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
 
       try {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? userId = prefs.getString('userId');
+        int? userId = prefs.getInt('userId');
 
         if (userId == null) {
           // Handle null userId
@@ -90,8 +90,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: descriptionController,
-                    decoration:
-                        const InputDecoration(labelText: 'Description'),
+                    decoration: const InputDecoration(labelText: 'Description'),
                     validator: (value) =>
                         value!.isEmpty ? 'Description is required' : null,
                     maxLines: 3,

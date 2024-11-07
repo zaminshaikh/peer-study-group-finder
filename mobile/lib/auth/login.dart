@@ -42,9 +42,9 @@ class _LoginPageState extends State<LoginPage> {
           );
 
           // Store userId for later use
-          String userId = responseData['UserId'];
+          int userId = responseData['id'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('userId', userId);
+          await prefs.setInt('userId', userId);
 
           // Navigate to the dashboard
           Navigator.pushNamed(context, '/dashboard');

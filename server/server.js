@@ -310,6 +310,6 @@ app.use((req, res, next) =>
   next();
 });
 
-const server = app.listen(5000); // start Node + Express server on port 5000
+const server = app.listen(8000); // start Node + Express server on port 5000
 
 module.exports = { app, server };

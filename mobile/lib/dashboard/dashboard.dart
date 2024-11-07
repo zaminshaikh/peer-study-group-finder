@@ -14,7 +14,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   List<dynamic> groups = [];
   bool isLoading = true;
-  String? userId; // Declare userId
+  int? userId; // Declare userId
 
   @override
   void initState() {
@@ -25,7 +25,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> loadUserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      userId = prefs.getString('userId');
+      userId = prefs.getInt('userId');
     });
     if (userId != null) {
       fetchGroups();
@@ -69,8 +69,8 @@ class _DashboardPageState extends State<DashboardPage> {
         itemCount: groups.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(groups[index]['Name']),
-            subtitle: Text(groups[index]['Class']),
+            title: Text(groups[index]),
+            // subtitle: Text(groups[index]['Class']),
             onTap: () {
               // Navigate to group details
             },
