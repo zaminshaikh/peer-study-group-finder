@@ -123,7 +123,9 @@ const StudyGroupDashboard = () => {
                 className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <FaFilter className="h-4 w-4" />
+                <span className="h-4 w-4">
+                  <FaFilter />
+                </span>
                 Filters
               </button>
               <button
@@ -162,7 +164,9 @@ const StudyGroupDashboard = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded pl-10"
                 />
-                <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
+                <span className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500">
+                  <FaSearch />
+                </span>
               </div>
             </div>
 

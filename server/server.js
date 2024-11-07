@@ -76,26 +76,24 @@ app.post('/api/register', async (req, res, next) =>
 
 app.post('/api/addgroup', async (req, res, next) =>
 {
-  // incoming: userId, color
+  // incoming: Class (code), Name, Owner, Link, Modality, Description, Size
   // outgoing: error
 	
-  const { Class, Name, Owner, Size, Link, Modality, Description} = req.body;
+  const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
 
   const students = [Owner];
-  const newCard = {Class:Class, Name:Name, Owner:Owner, Size:Size, Link:Link, Modality:Modality, Description:Description, Students:students};
+  const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:students, Size:Size, Location:Location, MeetingTime:MeetingTime};
   var error = '';
 
   try
   {
     const db = client.db('PeerGroupFinder');
-    const result = db.collection('Groups').insertOne(newCard);
+    const result = db.collection('Groups').insertOne(newGroup);
   }
   catch(e)
   {
     error = e.toString();
   }
-
-  // cardList.push( card );
 
   var ret = { error: error };
   res.status(200).json(ret);
@@ -179,6 +177,125 @@ app.post('/api/joingroup', async (req, res, next) =>
     res.status(200).json(ret);
   });
 
+
+
+// Adds the userId to the students array for the group, and adds the groupId to the group array for the user.
+app.post('/api/joingroup', async (req, res, next) => 
+{
+    // incoming: userId, groupId
+    // outgoing: error
+    
+    var error = '';
+  
+    const { userId, groupId } = req.body;
+  
+    try {
+      const db = client.db('PeerGroupFinder');
+
+      const result = await db.collection('Users').updateOne(
+        {UserId: userId},
+        {$addToSet: {Group: groupId}}
+      );
+
+      const result2 = await db.collection('Groups').updateOne(
+        {GroupId: groupId},
+        {$addToSet: {Students: userId}}
+      );
+    }
+    catch(e) {
+      error = e.toString();
+    }
+    
+    var ret = {error:''};
+    res.status(200).json(ret);
+});
+
+// Deletes userId from the students array for the group, and deletes groupId from the group array for the user.
+app.post('/api/leavegroup', async (req, res, next) =>
+{
+  // incoming: userId, groupId
+  // outgoing: error
+
+  var error = '';
+
+  const { userId, groupId } = req.body;
+
+  try {
+    const db = client.db('PeerGroupFinder');
+
+    const result = await db.collection('Users').updateOne(
+      {UserId: userId},
+      {$pull: {Group: groupId}}
+    );
+
+    const result2 = await db.collection('Groups').updateOne(
+      {GroupId: groupId},
+      {$pull: {Students: userId}}
+    );
+  }
+  catch(e) {
+    error = e.toString();
+  }
+
+  var ret = {error: error};
+
+  if (!error)
+    res.status(200).json(ret);
+  else
+    res.status(404).json(ret);
+
+});
+
+
+// Deletes the group and updates all the users as necessary.
+// NOTICE: Will most likely be changed to utilize js promises!
+app.post('/api/deletegroup', async (req, res, next) =>
+{
+  // incoming: userId, groupId
+  // outgoing: error
+
+  var error = '';
+
+  const {userId, groupId, owner, students} = req.body;
+
+  if (userId !== owner) {
+    error = "User is not owner of group";
+    res.status(404).json({error: error});
+    return;
+  }
+
+  try {
+    const db = client.db('PeerGroupFinder');
+
+    // Deletes the groupId from the ownerofgroup array of the user.
+    const result = await db.collection('Users').updateOne(
+      {UserId: userId},
+      {$pull: {OwnerOfGroup: groupId}}
+    );
+
+    // Deletes the groupId from the group array of each user in the group's students array.
+    const result2 = await db.collection('Users').updateMany(
+      {UserId: {$in: students}},
+      {$pull: {Group: groupId}}
+    );
+
+    // Deletes the group from the groups collection.
+    const result3 = await db.collection('Groups').deleteOne(
+      {GroupId: groupId}
+    );
+  }
+  catch(e) {
+    error = e.toString();
+  }
+
+  var ret = {error:error};
+
+  if (!error)
+    res.status(200).json(ret);
+  else
+    res.status(600).json(ret);
+});
+
 app.use((req, res, next) => 
 {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -193,4 +310,6 @@ app.use((req, res, next) =>
   next();
 });
 
-app.listen(5000); // start Node + Express server on port 5000
+const server = app.listen(5000); // start Node + Express server on port 5000
+
+module.exports = { app, server };
