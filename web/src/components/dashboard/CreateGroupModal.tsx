@@ -35,7 +35,16 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     e.preventDefault();
 
     // Validation check
-    if (!name || !description || !class_ || !modality) {
+    if (
+      !name ||
+      !description ||
+      !size ||
+      !location ||
+      !meetingTime ||
+      !link ||
+      !class_ ||
+      !modality
+    ) {
       setErrorMessage("Please fill in all the mandatory fields.");
       return; // Prevent form submission if mandatory fields are empty
     }
@@ -135,14 +144,14 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             <Input
               Icon={MapPin}
               type="text"
-              placeholder="Location (optional)"
+              placeholder="Location (e.g., Zoom/Address)"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
             <Input
               Icon={Calendar}
               type="text"
-              placeholder="Meeting Time (optional)"
+              placeholder="Meeting Time (e.g., T/Th, 10am - 12pm)"
               value={meetingTime}
               onChange={(e) => setMeetingTime(e.target.value)}
             />
