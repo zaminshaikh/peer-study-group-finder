@@ -16,11 +16,11 @@ class DashboardPage extends StatefulWidget {
 }
 
 class DashboardPageState extends State<DashboardPage> {
-  List<dynamic> groups = [];
+  List<StudyGroup> groups = [];
   bool isLoading = true;
   int? userId;
   TextEditingController searchController = TextEditingController();
-  List<dynamic> filteredGroups = [];
+  List<StudyGroup> filteredGroups = [];
   Map<String, dynamic> selectedFilters = {};
 
   @override
@@ -45,49 +45,38 @@ class DashboardPageState extends State<DashboardPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/searchgroups'),
+        Uri.parse('http://10.0.2.2:8000/api/fetchgroups'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'UserId': userId,
-          'Search': searchController.text, // Use search term if needed
+          'Search': searchController.text.trim(),
+          'Filters': selectedFilters,
         }),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // Fetch details for each group
-        List<StudyGroup> groupDetails = [];
+        // Parse the list of groups from the response
+        List<StudyGroup> groupList = [];
 
-        for (var name in data['results']) {
-          final groupResponse = await http.get(
-            Uri.parse(
-                'http://10.0.2.2:8000/api/getgroupdetails?name=${Uri.encodeComponent(name)}'),
-            headers: {'Content-Type': 'application/json'},
-          );
-
-          if (groupResponse.statusCode == 200) {
-            final groupData = jsonDecode(groupResponse.body);
-            groupDetails.add(StudyGroup(
-              id: name,
-              name: name,
-              description: groupData['Description'] ?? '',
-              className: groupData['Class'] ?? '',
-              size: groupData['Size'] ?? 0,
-              modality: groupData['Modality'] ?? '',
-              location: groupData['Location'],
-              meetingTime: groupData['MeetingTime'],
-              // createdAt: DateTime.parse(groupData['CreatedAt'] ?? ''), //TODO: Fix this
-            ));
-          } else {
-            // Handle individual group fetch error if necessary
-            continue;
-          }
+        for (var groupData in data['results']) {
+          groupList.add(StudyGroup(
+            id: groupData['_id'], // Assuming MongoDB ObjectId
+            name: groupData['Name'],
+            description: groupData['Description'] ?? '',
+            className: groupData['Class'] ?? '',
+            size: groupData['Size'] ?? 0,
+            modality: groupData['Modality'] ?? '',
+            location: groupData['Location'],
+            meetingTime: groupData['MeetingTime'],
+            // createdAt: DateTime.parse(groupData['createdAt'] ?? ''), // Uncomment if needed
+          ));
         }
 
         setState(() {
-          groups = groupDetails;
-          _applyFilters();
+          groups = groupList;
+          filteredGroups = groupList; // Initially, all groups are displayed
           isLoading = false;
         });
       } else {
@@ -103,19 +92,16 @@ class DashboardPageState extends State<DashboardPage> {
       );
     }
   }
-  
+
   void _applyFilters() {
     setState(() {
       filteredGroups = groups.where((group) {
-        final matchesSearch = group.name
-            .toLowerCase()
-            .contains(searchController.text.toLowerCase());
         final matchesModality = selectedFilters['modalities'] == null ||
             selectedFilters['modalities'].isEmpty ||
             selectedFilters['modalities'].contains(group.modality);
         final matchesSize = group.size <= (selectedFilters['maxSize'] ?? 200);
-  
-        return matchesSearch && matchesModality && matchesSize;
+
+        return matchesModality && matchesSize;
       }).toList();
     });
   }
@@ -144,12 +130,18 @@ class DashboardPageState extends State<DashboardPage> {
     });
   }
 
-  void _showGroupDetails(String groupId) {
+  void _showGroupDetails(StudyGroup group) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => GroupDetailsSheet(groupId: groupId),
+      builder: (_) => GroupDetailsSheet(group: group),
     );
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -183,7 +175,7 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               onChanged: (value) {
-                _applyFilters();
+                fetchGroups();
               },
             ),
           ),
@@ -191,19 +183,26 @@ class DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                  itemCount: filteredGroups.length,
-                  itemBuilder: (context, index) {
-                    final group = filteredGroups[index];
-                    return ListTile(
-                      title: Text(group.name),
-                      subtitle: Text(group.className),
-                      onTap: () {
-                        _showGroupDetails(group.id);
-                      },
-                    );
-                  },
-                )
+                : filteredGroups.isEmpty
+                    ? const Center(child: Text('No groups found.'))
+                    : ListView.builder(
+                        itemCount: filteredGroups.length,
+                        itemBuilder: (context, index) {
+                          final group = filteredGroups[index];
+                          return ListTile(
+                            title: Text(group.name),
+                            subtitle: Text(group.className),
+                            onTap: () {
+                              _showGroupDetails(group);
+                            },
+                          );
+                          // If using GroupCard:
+                          // return GroupCard(
+                          //   group: group,
+                          //   onTap: () => _showGroupDetails(group.id),
+                          // );
+                        },
+                      ),
           ),
         ],
       ),
