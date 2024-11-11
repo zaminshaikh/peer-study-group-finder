@@ -5,7 +5,7 @@ interface Props {
   name: string;
   isOpen: boolean;
   to: string;
-  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  onClick?: () => void;
 }
 
 const SideBarLink = ({ children, name, isOpen, to, onClick }: Props) => {
