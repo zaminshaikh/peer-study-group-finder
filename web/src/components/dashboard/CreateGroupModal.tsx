@@ -15,11 +15,13 @@ import classesData from "../../../classes.json";
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;
   setShowCreateGroupModal: (show: boolean) => void;
+  userId: number;
 }
 
 const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onCreateGroup,
   setShowCreateGroupModal,
+  userId,
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -32,7 +34,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [meetingTime, setMeetingTime] = useState("");
   const [link, setLink] = useState(""); // New state for the link
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
-  const [searchTerm, setSearchTerm] = useState(""); // New state for search term
 
   // Prepare options for react-select dropdown
   const classOptions = classesData.departments.flatMap((department) =>
@@ -70,7 +71,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           Name: name,
           Description: description,
           Class: class_,
-          Owner: 1,
+          Owner: userId,
           Size: size,
           Modality: modality,
           Link: link, // Include link in API request
@@ -78,7 +79,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           MeetingTime: meetingTime,
         }),
       });
-
+      console.log(userId);
       const data = await response.json();
       if (data.error) {
         console.error(data.error);
