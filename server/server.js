@@ -120,6 +120,7 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     link: group.Link,
     modality: group.Modality,
     createdAt: group.createdAt,
+    groupId: group.GroupId,
   });
 });
 
@@ -150,35 +151,35 @@ app.post('/api/searchgroups', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-app.post('/api/joingroup', async (req, res, next) => 
-  {
-    // incoming: userId, name
-    // outgoing: error
+// app.post('/api/joingroup', async (req, res, next) => 
+//   {
+//     // incoming: userId, name
+//     // outgoing: error
     
-   var error = '';
+//    var error = '';
   
-    const { userId, name } = req.body;
+//     const { userId, name } = req.body;
   
-    try {
-      const db = client.db('PeerGroupFinder');
+//     try {
+//       const db = client.db('PeerGroupFinder');
 
-      const result = await db.collection('Users').updateOne(
-        {UserId: userId},
-        {$addToSet: {Groups: name}}
-      );
+//       const result = await db.collection('Users').updateOne(
+//         {UserId: userId},
+//         {$addToSet: {Groups: name}}
+//       );
 
-      const result2 = await db.collection('Groups').updateOne(
-        {Name: name},
-        {$addToSet: {Students: userId}}
-      );
-    }
-    catch {
-      error = e.toString();
-    }
+//       const result2 = await db.collection('Groups').updateOne(
+//         {Name: name},
+//         {$addToSet: {Students: userId}}
+//       );
+//     }
+//     catch {
+//       error = e.toString();
+//     }
     
-    var ret = {error:''};
-    res.status(200).json(ret);
-  });
+//     var ret = {error:''};
+//     res.status(200).json(ret);
+//   });
 
 
 
