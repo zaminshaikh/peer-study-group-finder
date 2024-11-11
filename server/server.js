@@ -17,31 +17,41 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 app.post('/api/login', async (req, res, next) => 
 {
-  // incoming: login, password
-  // outgoing: id, firstName, lastName, error
+  // incoming: Email, Password
+  // outgoing: id, firstName, lastName, displayName, groups, error
   
-  var error = '';
-
+  let error = '';
+  
   const { Email, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Email:Email,Password:Password}).toArray();
+  const results = await db.collection('Users').find({ Email: Email, Password: Password }).toArray();
 
-  var id = -1;
-  var fn = '';
-  var ln = '';
+  let id = -1;
+  let fn = '';
+  let ln = '';
   let displayName = '';
+  let groups = [];
 
-  if( results.length > 0 )
-  {
+  if (results.length > 0) {
     id = results[0].UserId;
     fn = results[0].FirstName;
     ln = results[0].LastName;
     displayName = results[0].DisplayName;
-    groups = results[0].Groups || [];
+    groups = results[0].Groups || []; // Ensure Groups is an array
+  } else {
+    error = 'Invalid Email or Password';
   }
 
-  var ret = { id:id, firstName:fn, lastName:ln, displayName:displayName, error:''};
+  const ret = { 
+    id: id, 
+    firstName: fn, 
+    lastName: ln, 
+    displayName: displayName, 
+    groups: groups, // Include groups
+    error: error 
+  };
+  
   res.status(200).json(ret);
 });
 
