@@ -9,6 +9,8 @@ import {
   Link as LinkIcon,
   X,
 } from "lucide-react";
+import Select from "react-select";
+import classesData from "../../../classes.json";
 
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;
@@ -30,6 +32,15 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [meetingTime, setMeetingTime] = useState("");
   const [link, setLink] = useState(""); // New state for the link
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const [searchTerm, setSearchTerm] = useState(""); // New state for search term
+
+  // Prepare options for react-select dropdown
+  const classOptions = classesData.departments.flatMap((department) =>
+    department.courses.map((course) => ({
+      value: `${department.code}${course.number}`,
+      label: `${department.code} ${course.number} - ${course.title}`,
+    }))
+  );
 
   const handleCreateGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -125,13 +136,18 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setName(e.target.value)}
             />
 
-            <Input
-              Icon={Users}
-              type="text"
-              placeholder="Class (e.g., MATH101)"
-              value={class_}
-              onChange={(e) => setClass(e.target.value)}
-            />
+            {/* Searchable dropdown for classes */}
+            <div className="mb-4 relative">
+              <Select
+                options={classOptions}
+                onChange={(selectedOption) =>
+                  setClass(selectedOption?.value || "")
+                }
+                value={classOptions.find((option) => option.value === class_)}
+                placeholder="Select Class"
+              />
+            </div>
+
             <Input
               Icon={Users}
               type="number"
@@ -180,7 +196,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               </select>
             </div>
 
-            {/* Update this Input to a larger field (use a textarea for description) */}
             <div className="mb-4">
               <textarea
                 placeholder="Description"
