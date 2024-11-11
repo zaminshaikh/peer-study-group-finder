@@ -56,6 +56,7 @@ app.post('/api/register', async (req, res, next) =>
 
   var isEmailInUse = results.length > 0;
   if(isEmailInUse){
+    error = "Email is already in use";
     var ret = { emailAlreadyUsed: true, error: error };
     res.status(200).json(ret);
     return;
