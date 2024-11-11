@@ -12,6 +12,9 @@ const MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url);
 client.connect();
 
+const sgMail = require('@sendgrid/mail')
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+
 app.post('/api/login', async (req, res, next) => 
 {
   // incoming: login, password
@@ -39,7 +42,8 @@ app.post('/api/login', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-
+// Registers a user.
+// Also, creates a verification code and adds it as a field to the user, then sends the verification code to the user's email.
 app.post('/api/register', async (req, res, next) =>
 { 
   const { FirstName, LastName, DisplayName, Email, Password } = req.body;
@@ -52,12 +56,15 @@ app.post('/api/register', async (req, res, next) =>
 
   var isEmailInUse = results.length > 0;
   if(isEmailInUse){
+    error = "Email is already in use";
     var ret = { emailAlreadyUsed: true, error: error };
     res.status(200).json(ret);
     return;
   }
 
-  const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray};
+  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+
+  const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
 
   try
   {
@@ -68,8 +75,103 @@ app.post('/api/register', async (req, res, next) =>
     error = e.toString();
   }
 
+  const msg = {
+    to: Email, // Change to your recipient
+    from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+    subject: 'PeerStudyGroupFinder: Email Verification',
+    text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
+  }
+  
+  await sgMail
+    .send(msg)
+    .then(() => {
+    console.log('Email sent')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+
   var ret = { emailAlreadyUsed: false, error: error };
   res.status(200).json(ret);
+});
+
+// Verifies that the user input the correct verification code.
+app.post('/api/verifyemail', async (req, res, next) => {
+
+  // incoming: UserId, InputVerificationCode
+  // outgoing: error
+
+  var error = '';
+
+  const { UserId, InputVerificationCode } = req.body;
+
+  try {
+
+    const db = client.db('PeerGroupFinder');
+    const result = await db.collection('Users').findOne({UserId:UserId});
+
+    const verificationCode = result.VerificationCode;
+
+    if (verificationCode === InputVerificationCode) {
+      res.status(200).json({error:error});
+    }
+    else {
+      error = "Verification code does not match";
+      res.status(600).json({error:error});
+    }
+
+  }
+  catch (e) {
+    error = e.toString();
+    res.status(600).json({error:error});
+  }
+
+});
+
+// Updates user's verification code with a new code and sends the new code to the user's email.
+app.post('/api/resendverificationemail', async (req, res, next) => {
+
+  // incoming: UserId
+  // Outgoing: error
+
+  var error = '';
+
+  const { UserId } = req.body;
+  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+
+  try {
+    
+    const db = client.db('PeerGroupFinder');
+
+    const user = await db.collection('Users').findOne({ UserId: UserId});
+
+    const msg = {
+      to: user.Email, // Change to your recipient
+      from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+      subject: 'PeerStudyGroupFinder: Resend Email Verification',
+      text: `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
+    }
+    
+    await sgMail
+      .send(msg)
+      .then(() => {
+      console.log('Email sent')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+
+    const response = await db.collection('Users').updateOne(
+      {UserId: UserId},
+      {$set: {VerificationCode: verificationCode}}
+    );
+
+    res.status(200).json({error:error});
+  }
+  catch (e) {
+    error = e.toString();
+    res.status(600).json({error:error});
+  }
 });
 
 app.post('/api/addgroup', async (req, res, next) =>
