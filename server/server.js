@@ -38,6 +38,7 @@ app.post('/api/login', async (req, res, next) =>
     fn = results[0].FirstName;
     ln = results[0].LastName;
     displayName = results[0].DisplayName;
+    groups = results[0].Groups || [];
   }
 
   var ret = { id:id, firstName:fn, lastName:ln, displayName:displayName, error:''};
