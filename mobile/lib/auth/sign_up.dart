@@ -54,7 +54,7 @@ class _SignUpPageState extends State<SignUpPage> {
           await prefs.setInt('userId', userId);
 
           // Navigate to the dashboard
-          Navigator.pushNamed(context, '/dashboard');
+          await Navigator.pushNamed(context, '/dashboard');
         } else {
           debugPrint(
               'Registration failed with error: ${responseData['error']}');
