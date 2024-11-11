@@ -10,6 +10,7 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
+  groupId: number;
 }
 
 interface StudyGroupListProps {
