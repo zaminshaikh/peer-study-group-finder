@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/dashboard/components/create_group_sheet.dart';
 import 'package:mobile/dashboard/components/filter_modal_sheet.dart';
+import 'package:mobile/dashboard/components/group_card.dart';
 import 'package:mobile/dashboard/components/group_details_sheet.dart';
 import 'package:mobile/models/study_group_model.dart';
 import 'dart:convert';
@@ -42,27 +43,23 @@ class DashboardPageState extends State<DashboardPage> {
 
   Future<void> fetchGroups() async {
     setState(() => isLoading = true);
-
+  
     try {
       final response = await http.post(
         Uri.parse('http://10.0.2.2:8000/api/fetchgroups'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'UserId': userId,
-          'Search': searchController.text.trim(),
-          'Filters': selectedFilters,
-        }),
+        body: jsonEncode({}), // Sending an empty body since no parameters are needed
       );
-
+  
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
+  
         // Parse the list of groups from the response
         List<StudyGroup> groupList = [];
-
+  
         for (var groupData in data['results']) {
           groupList.add(StudyGroup(
-            id: groupData['_id'], // Assuming MongoDB ObjectId
+            id: groupData['_id'], // Adjust according to your data structure
             name: groupData['Name'],
             description: groupData['Description'] ?? '',
             className: groupData['Class'] ?? '',
@@ -70,13 +67,12 @@ class DashboardPageState extends State<DashboardPage> {
             modality: groupData['Modality'] ?? '',
             location: groupData['Location'],
             meetingTime: groupData['MeetingTime'],
-            // createdAt: DateTime.parse(groupData['createdAt'] ?? ''), // Uncomment if needed
           ));
         }
-
+  
         setState(() {
           groups = groupList;
-          filteredGroups = groupList; // Initially, all groups are displayed
+          filteredGroups = groupList; // Since all groups are fetched, no need to filter
           isLoading = false;
         });
       } else {
@@ -92,7 +88,7 @@ class DashboardPageState extends State<DashboardPage> {
       );
     }
   }
-
+  
   void _applyFilters() {
     setState(() {
       filteredGroups = groups.where((group) {
@@ -189,18 +185,12 @@ class DashboardPageState extends State<DashboardPage> {
                         itemCount: filteredGroups.length,
                         itemBuilder: (context, index) {
                           final group = filteredGroups[index];
-                          return ListTile(
-                            title: Text(group.name),
-                            subtitle: Text(group.className),
+                          return GroupCard(
+                            group: group,
                             onTap: () {
                               _showGroupDetails(group);
                             },
                           );
-                          // If using GroupCard:
-                          // return GroupCard(
-                          //   group: group,
-                          //   onTap: () => _showGroupDetails(group.id),
-                          // );
                         },
                       ),
           ),

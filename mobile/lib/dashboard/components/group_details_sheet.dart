@@ -19,7 +19,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
 
   void joinGroup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getInt('userId')?.toString();
+    int? userId = prefs.getInt('userId');
     if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('User not logged in')),
@@ -31,10 +31,11 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
     setState(() => isLoading = true);
 
     try {
+      String groupId = widget.group.id.toString();
       final response = await http.post(
         Uri.parse('http://10.0.2.2:8000/api/joingroup'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'UserId': userId, 'GroupId': widget.group.id}),
+        body: jsonEncode({'UserId': userId, 'GroupName': widget.group.name}),
       );
 
       if (response.statusCode == 200) {
@@ -62,7 +63,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
     final screenHeight = MediaQuery.of(context).size.height;
   
     return SizedBox(
-      height: screenHeight * 0.37, // Half the screen height
+      height: screenHeight * 0.6, // Half the screen height
       width: double.infinity, // Full horizontal width
       child: Padding(
         padding: const EdgeInsets.all(16),
