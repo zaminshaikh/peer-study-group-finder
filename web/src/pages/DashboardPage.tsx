@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SideBar from "../components/SideBar";
+import SideBar from "../components/Sidebar";
 import StudyGroupList from "../components/dashboard/GroupList";
 import StudyGroupDetail from "../components/dashboard/GroupDetails";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
@@ -69,6 +69,8 @@ const StudyGroupDashboard = () => {
             class: groupData.class,
             size: groupData.size,
             modality: groupData.modality,
+            location: groupData.location,
+            meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
           };
         })
@@ -107,7 +109,7 @@ const StudyGroupDashboard = () => {
   });
 
   return (
-    <div className="flex min-h-screen border-neutral-500/50 bg-neutral-800/20">
+    <div className="flex min-h-screen bg-black/80">
       {/* Sidebar */}
       <SideBar />
 
@@ -115,17 +117,15 @@ const StudyGroupDashboard = () => {
       <div className="flex-grow p-6 ml-20">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-black">
-              Study Group Finder
-            </h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+              Find Your Study Group
+            </h1>{" "}
             <div className="flex gap-2">
               <button
                 className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
                 onClick={() => setShowFilters(!showFilters)}
               >
-                <span className="h-4 w-4">
-                  <FaFilter />
-                </span>
+                <FaFilter className="h-4 w-4" />
                 Filters
               </button>
               <button
@@ -164,13 +164,11 @@ const StudyGroupDashboard = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded pl-10"
                 />
-                <span className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500">
-                  <FaSearch />
-                </span>
+                <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
               </div>
             </div>
 
-            <div className="flex space-x-4 w-full">
+            <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
               <StudyGroupList
                 groups={filteredGroups}
                 selectedGroup={selectedGroup}

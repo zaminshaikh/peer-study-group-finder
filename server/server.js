@@ -216,6 +216,9 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     description: group.Description,
     class: group.Class,
     size: group.Size,
+    location: group.Location,
+    meetingTime: group.MeetingTime,
+    link: group.Link,
     modality: group.Modality,
     createdAt: group.createdAt,
   });
