@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import SideBar from "../components/Sidebar";
+import React, { useState, useEffect } from "react";;
 import StudyGroupList from "../components/dashboard/GroupList";
 import StudyGroupDetail from "../components/dashboard/GroupDetails";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import FilterModal from "../components/dashboard/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { PlusCircleIcon } from "lucide-react";
+import SideBar from "../components/SideBar";
 
 interface StudyGroup {
   id: string;

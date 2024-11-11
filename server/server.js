@@ -252,6 +252,44 @@ app.post('/api/searchgroups', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
+app.post('/api/fetchgroups', async (req, res, next) => {
+  const { UserId, Search, Filters } = req.body;
+
+  try {
+    const db = client.db();
+    const groupsCollection = db.collection('Groups');
+
+    // Build query object based on passed parameters
+    let query = {};
+
+    if (Search && Search.trim() !== '') {
+      query['Name'] = { $regex: new RegExp(Search.trim(), 'i') };
+    }
+
+    if (Filters) {
+      // Apply modality filter
+      if (Filters.modalities && Filters.modalities.length > 0) {
+        query['Modality'] = { $in: Filters.modalities };
+      }
+
+      // Apply size filter
+      if (Filters.maxSize) {
+        query['Size'] = { $lte: Filters.maxSize };
+      }
+
+      // Add more filters as needed
+    }
+
+    // Fetch groups based on the query
+    const groups = await groupsCollection.find(query).toArray();
+
+    res.status(200).json({ results: groups });
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).json({ error: 'An error occurred while fetching groups.' });
+  }
+});
+
 app.post('/api/joingroup', async (req, res, next) => 
   {
     // incoming: userId, name
