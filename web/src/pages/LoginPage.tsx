@@ -13,7 +13,7 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Name:", email);
-    const response = await fetch("http://localhost:5001/api/login", {
+    const response = await fetch("http://localhost:5000/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -31,8 +31,9 @@ const LoginPage = () => {
     } else {
       // Handle successful registration (e.g., redirect to login or show success message)
       localStorage.setItem("displayName", data.displayName);
+      localStorage.setItem("userId", data.id.toString());
       console.log("Login successful:", data);
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 
