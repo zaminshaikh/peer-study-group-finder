@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/study_group_model.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/models/user_model.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,10 +18,30 @@ class GroupDetailsSheet extends StatefulWidget {
 class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
   bool isLoading = false;
 
-  void joinGroup() async {
+  Future<User?> loadUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? userId = prefs.getInt('userId');
-    if (userId == null) {
+    String? userJson = prefs.getString('user');
+    if (userJson != null) {
+      try {
+        Map<String, dynamic> userMap = jsonDecode(userJson);
+        return User.fromJson(userMap);
+      } catch (e) {
+        // If there's an error in decoding, navigate to login
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading user data: $e')),
+        );
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } else {
+      // If no user data found, navigate to login
+      Navigator.pushReplacementNamed(context, '/');
+      return null;
+    }
+    return null;
+  }
+  void joinGroup() async {
+    User? user = await loadUser();
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('User not logged in')),
       );
@@ -31,11 +52,11 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
     setState(() => isLoading = true);
 
     try {
-      String groupId = widget.group.id.toString();
+      String groupId = widget.group.id;
       final response = await http.post(
         Uri.parse('http://10.0.2.2:8000/api/joingroup'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'UserId': userId, 'GroupName': widget.group.name}),
+        body: jsonEncode({'UserId': user.userId, 'GroupId': groupId}),
       );
 
       if (response.statusCode == 200) {
