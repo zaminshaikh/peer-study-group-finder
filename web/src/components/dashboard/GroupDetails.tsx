@@ -201,7 +201,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
             ${
               isMember
                 ? "bg-red-500 hover:bg-red-600 text-white"
-                : "bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-700 text-white hover:from-yellow-900 hover:to-yellow-500"
+                : "bg-green-500 hover:bg-green-600 text-white "
             }
             focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
             disabled:opacity-50 disabled:cursor-not-allowed`}
