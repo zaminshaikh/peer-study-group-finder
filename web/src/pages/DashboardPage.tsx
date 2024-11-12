@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import StudyGroupList from "../components/dashboard/GroupList";
@@ -19,6 +19,7 @@ interface StudyGroup {
   meetingTime?: string;
   createdAt: Date;
   groupId: number;
+  students: number[];
 }
 
 interface Filters {
@@ -59,14 +60,13 @@ const StudyGroupDashboard = () => {
     }
   }, [userId]);
 
-  //refreshing for when a group is created
   const refreshGroups = async () => {
     setIsLoading(true);
     setIsLoading(false);
   };
 
   const fetchGroups = async () => {
-    setIsLoading(true);
+    //setIsLoading(true);
     setError(null);
     try {
       const response = await fetch("http://localhost:5000/api/searchgroups", {
@@ -117,6 +117,7 @@ const StudyGroupDashboard = () => {
             meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
             groupId: groupData.groupId,
+            students: groupData.students || [], // Add students array from API response
           };
         })
       );
@@ -134,10 +135,34 @@ const StudyGroupDashboard = () => {
     }
   };
 
+  // Handler for updating group data when membership changes
+  const handleGroupUpdate = (updatedGroup: StudyGroup) => {
+    setGroups((prevGroups) =>
+      prevGroups.map((group) =>
+        group.groupId === updatedGroup.groupId ? updatedGroup : group
+      )
+    );
+
+    // Update selected group if it's the one being modified
+    if (selectedGroup?.groupId === updatedGroup.groupId) {
+      setSelectedGroup(updatedGroup);
+    }
+  };
+
   const handleCreateGroup = (newGroup: StudyGroup) => {
-    setGroups([...groups, newGroup]);
+    setGroups((prev) => [...prev, newGroup]);
     setShowCreateGroupModal(false);
-    refreshGroups(); // Refresh the groups list after creating a new group
+    fetchGroups(); // Refresh the groups list after creating a new group
+  };
+
+  const handleJoinSuccess = () => {
+    refreshGroups(); // Refresh groups to get updated data
+    console.log("successfully joined group");
+  };
+
+  const handleLeaveSuccess = () => {
+    refreshGroups(); // Refresh groups to get updated data
+    console.log("successfully left group");
   };
 
   const handleModalityChange = (modality: string) => {
@@ -149,13 +174,6 @@ const StudyGroupDashboard = () => {
       return { ...prev, modalities: newModalities };
     });
   };
-
-  // const handleMaxSizeChange = (size: number) => {
-  //   setFilters((prev) => ({
-  //     ...prev,
-  //     maxSize: size,
-  //   }));
-  // };
 
   const filteredGroups = groups.filter((group) => {
     const matchesSearch =
@@ -249,7 +267,13 @@ const StudyGroupDashboard = () => {
               />
 
               {selectedGroup && (
-                <StudyGroupDetail group={selectedGroup} userId={userId || 0} />
+                <StudyGroupDetail
+                  group={selectedGroup}
+                  userId={userId || 0}
+                  onGroupUpdate={handleGroupUpdate}
+                  onJoinSuccess={handleJoinSuccess}
+                  onLeaveSuccess={handleLeaveSuccess}
+                />
               )}
             </div>
           </div>
