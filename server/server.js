@@ -222,7 +222,7 @@ app.post('/api/addgroup', async (req, res, next) =>
   try
   {
     const db = client.db('PeerGroupFinder');
-    const result = db.collection('Groups').insertOne(newGroup);
+    const result = db.collection('Groups').insertOne(newGroup);  
   }
   catch(e)
   {
@@ -254,6 +254,8 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     link: group.Link,
     modality: group.Modality,
     createdAt: group.createdAt,
+    groupId: group.GroupId,
+    students: group.Students
   });
 });
 
@@ -284,6 +286,9 @@ app.post('/api/searchgroups', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
+
+// Adds the userId to the students array for the group, and adds the groupId to the group array for the user.
+
 // Updated /api/fetchgroups endpoint to return all groups
 app.post('/api/fetchgroups', async (req, res, next) => {
   try {
@@ -302,39 +307,39 @@ app.post('/api/fetchgroups', async (req, res, next) => {
 
 // Adds the UserId to the Students array for the group, and adds the GroupId to the group array for the user.
 app.post('/api/joingroup', async (req, res, next) => 
-{
-// Incoming: userId, groupId
-  // Outgoing: error
+  {
+  // Incoming: userId, groupId
+    // Outgoing: error
+    
+    var error = '';
+    
+    const { UserId, GroupId } = req.body;
+    
+    try {
+      if (!UserId || !GroupId) {
+        throw new Error(`Missing required fields: UserId = ${UserId}, GroupId = ${GroupId}`);
+      }
   
-  var error = '';
+      const db = client.db('PeerGroupFinder');
   
-  const { UserId, GroupName } = req.body;
+      const result = await db.collection('Users').updateOne(
+        { UserId: UserId },
+        { $addToSet: { Group: GroupId } } // Note: 'Groups' field in Users collection
+      );
   
-  try {
-    if (!UserId || !GroupName) {
-      throw new Error(`Missing required fields: UserId = ${UserId}, GroupName = ${GroupName}`);
+      const result2 = await db.collection('Groups').updateOne(
+        { GroupId: GroupId },
+        { $addToSet: { Students: UserId } }
+      );
     }
-
-    const db = client.db('PeerGroupFinder');
-
-    const result = await db.collection('Users').updateOne(
-      { UserId: UserId },
-      { $addToSet: { Group: GroupName } } // Note: 'Groups' field in Users collection
-    );
-
-    const result2 = await db.collection('Groups').updateOne(
-      { Name: GroupName },
-      { $addToSet: { Students: UserId } }
-    );
-  }
-  catch(e) {
-    error = e.toString();
-  }
+    catch(e) {
+      error = e.toString();
+    }
+    
+    var ret = { error: error };
+    res.status(200).json(ret);
+  });
   
-  var ret = { error: error };
-  res.status(200).json(ret);
-});
-
 // Deletes userId from the students array for the group, and deletes groupId from the group array for the user.
 app.post('/api/leavegroup', async (req, res, next) =>
 {
@@ -437,6 +442,6 @@ app.use((req, res, next) =>
   next();
 });
 
-const server = app.listen(8000); // start Node + Express server on port 5000
+const server = app.listen(5000); // start Node + Express server on port 5000
 
 module.exports = { app, server };
