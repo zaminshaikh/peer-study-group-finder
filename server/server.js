@@ -121,6 +121,7 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     modality: group.Modality,
     createdAt: group.createdAt,
     groupId: group.GroupId,
+    students: group.Students
   });
 });
 
@@ -150,37 +151,6 @@ app.post('/api/searchgroups', async (req, res, next) =>
   var ret = {results:_ret, error:error};
   res.status(200).json(ret);
 });
-
-// app.post('/api/joingroup', async (req, res, next) => 
-//   {
-//     // incoming: userId, name
-//     // outgoing: error
-    
-//    var error = '';
-  
-//     const { userId, name } = req.body;
-  
-//     try {
-//       const db = client.db('PeerGroupFinder');
-
-//       const result = await db.collection('Users').updateOne(
-//         {UserId: userId},
-//         {$addToSet: {Groups: name}}
-//       );
-
-//       const result2 = await db.collection('Groups').updateOne(
-//         {Name: name},
-//         {$addToSet: {Students: userId}}
-//       );
-//     }
-//     catch {
-//       error = e.toString();
-//     }
-    
-//     var ret = {error:''};
-//     res.status(200).json(ret);
-//   });
-
 
 
 // Adds the userId to the students array for the group, and adds the groupId to the group array for the user.
