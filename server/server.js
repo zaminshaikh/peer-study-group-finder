@@ -208,9 +208,10 @@ app.post('/api/changepassword', async (req, res, next) => {
 
 });
 
+// Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
 app.post('/api/addgroup', async (req, res, next) =>
 {
-  // incoming: Class (code), Name, Owner, Link, Modality, Description, Size
+  // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
   // outgoing: error
 	
   const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
@@ -222,7 +223,16 @@ app.post('/api/addgroup', async (req, res, next) =>
   try
   {
     const db = client.db('PeerGroupFinder');
-    const result = db.collection('Groups').insertOne(newGroup);  
+    const result = await db.collection('Groups').insertOne(newGroup);
+
+    const group = await db.collection('Groups').findOne({_id: result.insertedId});
+    const GroupId = group.GroupId;
+
+    const result2 = await db.collection('Users').updateOne(
+      {UserId:Owner},
+      {$addToSet: {OwnerOfGroup:GroupId, Group:GroupId}}
+    );
+
   }
   catch(e)
   {
