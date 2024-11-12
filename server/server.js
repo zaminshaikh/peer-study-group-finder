@@ -17,30 +17,33 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 app.post('/api/login', async (req, res, next) => 
 {
-  // incoming: login, password
-  // outgoing: id, firstName, lastName, error
+  // incoming: Email, Password
+  // outgoing: id, firstName, lastName, displayName, groups, error
   
-  var error = '';
-
+  let error = '';
+  
   const { Email, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Email:Email,Password:Password}).toArray();
+  const results = await db.collection('Users').find({ Email: Email, Password: Password }).toArray();
 
-  var id = -1;
-  var fn = '';
-  var ln = '';
+  let id = -1;
+  let fn = '';
+  let ln = '';
   let displayName = '';
+  let group = [];
 
-  if( results.length > 0 )
-  {
+  if (results.length > 0) {
     id = results[0].UserId;
     fn = results[0].FirstName;
     ln = results[0].LastName;
     displayName = results[0].DisplayName;
+    group = results[0].Group || []; // Ensure Groups is an array
+  } else {
+    error = 'Invalid Email or Password';
   }
 
-  var ret = { UserId:id, FirstName:fn, LastName:ln, error:''};
+  const ret = { UserId:id, FirstName:fn, LastName:ln, DisplayName: displayName, Group: group, error:error};
   res.status(200).json(ret);
 });
 
@@ -282,70 +285,58 @@ app.post('/api/searchgroups', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-// app.post('/api/joingroup', async (req, res, next) => 
-//   {
-//     // incoming: userId, name
-//     // outgoing: error
-    
-//    var error = '';
-  
-//     const { userId, name } = req.body;
-  
-//     try {
-//       const db = client.db('PeerGroupFinder');
+// Updated /api/fetchgroups endpoint to return all groups
+app.post('/api/fetchgroups', async (req, res, next) => {
+  try {
+    const db = client.db('PeerGroupFinder'); // Specify your DB name
+    const groupsCollection = db.collection('Groups');
 
-//       const result = await db.collection('Users').updateOne(
-//         {UserId: userId},
-//         {$addToSet: {Groups: name}}
-//       );
+    // Fetch all groups without any filters
+    const groups = await groupsCollection.find({}).toArray();
 
-//       const result2 = await db.collection('Groups').updateOne(
-//         {Name: name},
-//         {$addToSet: {Students: userId}}
-//       );
-//     }
-//     catch {
-//       error = e.toString();
-//     }
-    
-//     var ret = {error:''};
-//     res.status(200).json(ret);
-//   });
-
-
+    res.status(200).json({ results: groups });
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).json({ error: 'An error occurred while fetching groups.' });
+  }
+});
 
 // Adds the UserId to the Students array for the group, and adds the GroupId to the group array for the user.
 app.post('/api/joingroup', async (req, res, next) => 
 {
-    // incoming: UserId, GroupId
-    // outgoing: error
-    
-    var error = '';
+// Incoming: userId, groupId
+  // Outgoing: error
   
-    const { UserId, GroupId } = req.body;
+  var error = '';
   
-    try {
-      const db = client.db('PeerGroupFinder');
-
-      const result = await db.collection('Users').updateOne(
-        {UserId: UserId},
-        {$addToSet: {Group: GroupId}}
-      );
-
-      const result2 = await db.collection('Groups').updateOne(
-        {GroupId: GroupId},
-        {$addToSet: {Students: UserId}}
-      );
+  const { UserId, GroupName } = req.body;
+  
+  try {
+    if (!UserId || !GroupName) {
+      throw new Error(`Missing required fields: UserId = ${UserId}, GroupName = ${GroupName}`);
     }
-    catch(e) {
-      error = e.toString();
-    }
-    
-    var ret = {error:''};
-    res.status(200).json(ret);
+
+    const db = client.db('PeerGroupFinder');
+
+    const result = await db.collection('Users').updateOne(
+      { UserId: UserId },
+      { $addToSet: { Group: GroupName } } // Note: 'Groups' field in Users collection
+    );
+
+    const result2 = await db.collection('Groups').updateOne(
+      { Name: GroupName },
+      { $addToSet: { Students: UserId } }
+    );
+  }
+  catch(e) {
+    error = e.toString();
+  }
+  
+  var ret = { error: error };
+  res.status(200).json(ret);
 });
 
-// Deletes UserId from the Students array for the group, and deletes GroupId from the group array for the user.
+// Deletes userId from the students array for the group, and deletes groupId from the group array for the user.
 app.post('/api/leavegroup', async (req, res, next) =>
 {
   // incoming: UserId, GroupId
@@ -447,6 +438,6 @@ app.use((req, res, next) =>
   next();
 });
 
-const server = app.listen(5000); // start Node + Express server on port 5000
+const server = app.listen(8000); // start Node + Express server on port 5000
 
 module.exports = { app, server };
