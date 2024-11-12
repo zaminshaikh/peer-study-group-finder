@@ -7,7 +7,6 @@ import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import FilterModal from "../components/dashboard/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { PlusCircleIcon } from "lucide-react";
-import SideBar from "../components/SideBar";
 
 interface StudyGroup {
   id: string;
@@ -63,6 +62,7 @@ const StudyGroupDashboard = () => {
 
   const refreshGroups = async () => {
     setIsLoading(true);
+    fetchGroups();
     setIsLoading(false);
   };
 
@@ -118,7 +118,7 @@ const StudyGroupDashboard = () => {
             meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
             groupId: groupData.groupId,
-            students: groupData.students || [], // Add students array from API response
+            students: groupData.students || [],
           };
         })
       );
@@ -132,7 +132,7 @@ const StudyGroupDashboard = () => {
           : "An error occurred while fetching groups"
       );
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   };
 
@@ -153,7 +153,7 @@ const StudyGroupDashboard = () => {
   const handleCreateGroup = (newGroup: StudyGroup) => {
     setGroups((prev) => [...prev, newGroup]);
     setShowCreateGroupModal(false);
-    fetchGroups(); // Refresh the groups list after creating a new group
+    refreshGroups(); // Refresh the groups list after creating a new group
   };
 
   const handleJoinSuccess = () => {
@@ -270,7 +270,7 @@ const StudyGroupDashboard = () => {
               {selectedGroup && (
                 <StudyGroupDetail
                   group={selectedGroup}
-                  userId={userId || 0}
+                  UserId={userId || 0}
                   onGroupUpdate={handleGroupUpdate}
                   onJoinSuccess={handleJoinSuccess}
                   onLeaveSuccess={handleLeaveSuccess}

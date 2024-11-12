@@ -62,24 +62,24 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     }
 
     setErrorMessage(""); // Clear any previous error message
+    console.log("creating group user id: ", userId);
 
     try {
       const response = await fetch("http://localhost:5000/api/addgroup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          Class: class_,
           Name: name,
           Description: description,
-          Class: class_,
           Owner: userId,
           Size: size,
           Modality: modality,
-          Link: link, // Include link in API request
+          Link: link,
           Location: location,
           MeetingTime: meetingTime,
         }),
       });
-      console.log(userId);
       const data = await response.json();
       if (data.error) {
         console.error(data.error);
@@ -91,12 +91,15 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           class: class_,
           size: Number(size),
           modality,
+          owner: userId,
           location: location || undefined,
           link: link || undefined, // Include link in created group
           meetingTime: meetingTime || undefined,
           createdAt: new Date(),
         });
         setShowCreateGroupModal(false);
+        console.log("successfully created group");
+        console.log("owner: ", userId);
       }
     } catch (error) {
       console.error("Error creating group:", error);

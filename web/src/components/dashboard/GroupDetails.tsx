@@ -18,7 +18,7 @@ interface StudyGroup {
 
 interface StudyGroupDetailProps {
   group: StudyGroup;
-  userId: number;
+  UserId: number;
   onJoinSuccess?: () => void;
   onLeaveSuccess?: () => void;
   onGroupUpdate?: (updatedGroup: StudyGroup) => void; // New prop for updating parent state
@@ -26,7 +26,7 @@ interface StudyGroupDetailProps {
 
 const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
   group,
-  userId,
+  UserId,
   onJoinSuccess,
   onLeaveSuccess,
   onGroupUpdate,
@@ -35,14 +35,17 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
   const [error, setError] = useState<string>("");
   const [isMember, setIsMember] = useState(false);
 
-  // Update membership status whenever group or userId changes
+  console.log(group.students);
+  console.log(UserId);
+
+  // Update membership status whenever group or UserId changes
   useEffect(() => {
     if (Array.isArray(group.students)) {
-      setIsMember(group.students.includes(userId));
+      setIsMember(group.students.includes(UserId));
     } else {
       setIsMember(false);
     }
-  }, [group.students, userId]);
+  }, [group.students, UserId]);
 
   const handleJoinGroup = async () => {
     if (isMember) return; // Prevent joining if already a member
@@ -56,8 +59,8 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId,
-          groupId: group.groupId,
+          UserId: UserId,
+          GroupId: group.groupId,
         }),
       });
 
@@ -77,14 +80,14 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         if (onGroupUpdate) {
           const updatedGroup = {
             ...group,
-            students: [...group.students, userId],
+            students: [...group.students, UserId],
           };
-          console.log("user id: ", userId);
           onGroupUpdate(updatedGroup);
           console.log("updated group joining: ", updatedGroup);
         }
-
         if (onJoinSuccess) onJoinSuccess();
+        console.log("user id: ", UserId);
+        console.log("group id: ", group.groupId);
       }
     } catch (err) {
       console.error("Join error:", err);
@@ -106,8 +109,8 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId,
-          groupId: group.groupId,
+          UserId,
+          GroupId: group.groupId,
         }),
       });
 
@@ -127,10 +130,11 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         if (onGroupUpdate) {
           const updatedGroup = {
             ...group,
-            students: group.students.filter((id) => id !== userId),
+            students: group.students.filter((id) => id !== UserId),
           };
           onGroupUpdate(updatedGroup);
-          console.log("user id: ", userId);
+          console.log("user id: ", UserId);
+          console.log("group id: ", group.groupId);
           console.log("updating group leaving: ", updatedGroup);
         }
 
