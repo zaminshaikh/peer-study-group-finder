@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import headshot_scott from "../imgs/headshot_scott.webp";
 import headshot_alex from "../imgs/headshot_alex.webp";
@@ -29,6 +29,16 @@ const LandingPage = () => {
       behavior: "smooth",
     });
   };
+
+  // Add useEffect to scroll to What is StudyHive section on page load
+  useEffect(() => {
+    // Add a small delay to ensure the page is fully loaded
+    const timer = setTimeout(() => {
+      scrollToSection(magnetoRef);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const aboutItems = [
     {
