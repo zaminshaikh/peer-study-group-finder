@@ -17,30 +17,42 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 app.post('/api/login', async (req, res, next) => 
 {
-  // incoming: login, password
-  // outgoing: id, firstName, lastName, error
+  // incoming: Email, Password
+  // outgoing: id, firstName, lastName, displayName, groups, error
   
-  var error = '';
-
+  let error = '';
+  
   const { Email, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Email:Email,Password:Password}).toArray();
+  const results = await db.collection('Users').find({ Email: Email, Password: Password }).toArray();
 
-  var id = -1;
-  var fn = '';
-  var ln = '';
-  let displayName = '';
+  let UserId = -1;
+  let FirstName = '';
+  let LastName = '';
+  let DisplayName = '';
+  let Group = [];
 
-  if( results.length > 0 )
-  {
-    id = results[0].UserId;
-    fn = results[0].FirstName;
-    ln = results[0].LastName;
-    displayName = results[0].DisplayName;
+  if (results.length > 0) {
+    UserId = results[0].UserId;
+    FirstName = results[0].FirstName;
+    LastName = results[0].LastName;
+    DisplayName = results[0].DisplayName;
+    Group = results[0].Group || []; // Ensure Groups is an array
+  } else {
+    error = 'Invalid Email or Password';
   }
 
-  var ret = { id:id, firstName:fn, lastName:ln, displayName:displayName, error:''};
+  const ret = { 
+    UserId,
+    Email, 
+    FirstName, 
+    LastName, 
+    DisplayName, 
+    Group, 
+    error 
+  };
+  
   res.status(200).json(ret);
 });
 
@@ -59,7 +71,7 @@ app.post('/api/register', async (req, res, next) =>
   var isEmailInUse = results.length > 0;
   if(isEmailInUse){
     error = "Email is already in use";
-    var ret = { emailAlreadyUsed: true, error: error };
+    var ret = { UserId: -1, error: error };
     res.status(200).json(ret);
     return;
   }
@@ -68,9 +80,12 @@ app.post('/api/register', async (req, res, next) =>
 
   const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
 
+  var result;
+  var user;
   try
   {
-    const result = db.collection('Users').insertOne(newUser);
+    result = await db.collection('Users').insertOne(newUser);
+    user = await db.collection("Users").findOne({ _id : result.insertedId} );
   }
   catch(e)
   {
@@ -93,7 +108,7 @@ app.post('/api/register', async (req, res, next) =>
       console.error(error)
     })
 
-  var ret = { emailAlreadyUsed: false, error: error };
+  var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
 });
 
@@ -176,6 +191,32 @@ app.post('/api/resendverificationemail', async (req, res, next) => {
   }
 });
 
+app.post('/api/changepassword', async (req, res, next) => {
+  var error = '';
+
+  const {UserId, Password}  = req.body;
+
+  const db = client.db('PeerGroupFinder');
+  
+  console.log(Password);
+
+  try{
+    const response = await db.collection('Users').updateOne(
+      {UserId: UserId},
+      {$set: {Password: Password}}
+    );
+
+    console.log(response.matchedCount);
+  }
+  catch(e) {
+    error = e.toString();
+  }
+  
+  var ret = {error:''};
+  res.status(200).json(ret);
+
+});
+
 app.post('/api/addgroup', async (req, res, next) =>
 {
   // incoming: Class (code), Name, Owner, Link, Modality, Description, Size
@@ -183,8 +224,8 @@ app.post('/api/addgroup', async (req, res, next) =>
 	
   const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
 
-  const students = [Owner];
-  const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:students, Size:Size, Location:Location, MeetingTime:MeetingTime};
+  const Students = [Owner];
+  const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:Students, Size:Size, Location:Location, MeetingTime:MeetingTime};
   var error = '';
 
   try
@@ -227,7 +268,7 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
 
 app.post('/api/searchgroups', async (req, res, next) => 
 {
-  // incoming: userId, search
+  // incoming: UserId, search
   // outgoing: results[], error
 
   // Currently uses Leinecker's searchcards outline, so searches through each group for the specified class.
@@ -252,90 +293,79 @@ app.post('/api/searchgroups', async (req, res, next) =>
   res.status(200).json(ret);
 });
 
-app.post('/api/joingroup', async (req, res, next) => 
-  {
-    // incoming: userId, name
-    // outgoing: error
-    
-   var error = '';
-  
-    const { userId, name } = req.body;
-  
-    try {
-      const db = client.db('PeerGroupFinder');
+// Updated /api/fetchgroups endpoint to return all groups
+app.post('/api/fetchgroups', async (req, res, next) => {
+  try {
+    const db = client.db('PeerGroupFinder'); // Specify your DB name
+    const groupsCollection = db.collection('Groups');
 
-      const result = await db.collection('Users').updateOne(
-        {UserId: userId},
-        {$addToSet: {Groups: name}}
-      );
+    // Fetch all groups without any filters
+    const groups = await groupsCollection.find({}).toArray();
+    console.log('Fetched groups:', groups);
 
-      const result2 = await db.collection('Groups').updateOne(
-        {Name: name},
-        {$addToSet: {Students: userId}}
-      );
-    }
-    catch {
-      error = e.toString();
-    }
-    
-    var ret = {error:''};
-    res.status(200).json(ret);
-  });
+    res.status(200).json({ results: groups });
+  } catch (error) {
+    console.error('Error fetching groups:', error);
+    res.status(500).json({ error: 'An error occurred while fetching groups.' });
+  }
+});
 
-
-
-// Adds the userId to the students array for the group, and adds the groupId to the group array for the user.
+// Adds the UserId to the Students array for the group, and adds the GroupId to the group array for the user.
 app.post('/api/joingroup', async (req, res, next) => 
 {
-    // incoming: userId, groupId
-    // outgoing: error
-    
-    var error = '';
+// Incoming: userId, groupId
+  // Outgoing: error
   
-    const { userId, groupId } = req.body;
+  var error = '';
   
-    try {
-      const db = client.db('PeerGroupFinder');
-
-      const result = await db.collection('Users').updateOne(
-        {UserId: userId},
-        {$addToSet: {Group: groupId}}
-      );
-
-      const result2 = await db.collection('Groups').updateOne(
-        {GroupId: groupId},
-        {$addToSet: {Students: userId}}
-      );
+  const { UserId, GroupId } = req.body;
+  
+  try {
+    if (!UserId || !GroupId) {
+      throw new Error(`Missing required fields: UserId = ${UserId}, GroupId = ${GroupId}`);
     }
-    catch(e) {
-      error = e.toString();
-    }
-    
-    var ret = {error:''};
-    res.status(200).json(ret);
+
+    const db = client.db('PeerGroupFinder');
+
+    const result = await db.collection('Users').updateOne(
+      { UserId: UserId },
+      { $addToSet: { Group: GroupId } } // Note: 'Groups' field in Users collection
+    );
+
+    const result2 = await db.collection('Groups').updateOne(
+      { GroupId: GroupId },
+      { $addToSet: { Students: UserId } }
+    );
+  }
+  catch(e) {
+    error = e.toString();
+  }
+  
+  var ret = { error: error };
+  res.status(200).json(ret);
 });
 
 // Deletes userId from the students array for the group, and deletes groupId from the group array for the user.
 app.post('/api/leavegroup', async (req, res, next) =>
 {
-  // incoming: userId, groupId
+  // incoming: UserId, GroupId
   // outgoing: error
 
   var error = '';
 
-  const { userId, groupId } = req.body;
+  const { UserId, GroupId } = req.body;
 
   try {
     const db = client.db('PeerGroupFinder');
 
     const result = await db.collection('Users').updateOne(
-      {UserId: userId},
-      {$pull: {Group: groupId}}
+      {UserId: UserId},
+      {$pull: {Group: GroupId}}
     );
 
     const result2 = await db.collection('Groups').updateOne(
-      {GroupId: groupId},
-      {$pull: {Students: userId}}
+      {GroupId: GroupId},
+      {$pull: {Students: UserId}}
     );
   }
   catch(e) {
@@ -356,15 +386,15 @@ app.post('/api/leavegroup', async (req, res, next) =>
 // NOTICE: Will most likely be changed to utilize js promises!
 app.post('/api/deletegroup', async (req, res, next) =>
 {
-  // incoming: userId, groupId
+  // incoming: UserId, GroupId
   // outgoing: error
 
   var error = '';
 
-  const {userId, groupId, owner, students} = req.body;
+  const {UserId, GroupId, Owner, Students} = req.body;
 
-  if (userId !== owner) {
-    error = "User is not owner of group";
+  if (UserId !== Owner) {
+    error = "User is not Owner of group";
     res.status(404).json({error: error});
     return;
   }
@@ -372,21 +402,21 @@ app.post('/api/deletegroup', async (req, res, next) =>
   try {
     const db = client.db('PeerGroupFinder');
 
-    // Deletes the groupId from the ownerofgroup array of the user.
+    // Deletes the GroupId from the ownerofgroup array of the user.
     const result = await db.collection('Users').updateOne(
-      {UserId: userId},
-      {$pull: {OwnerOfGroup: groupId}}
+      {UserId: UserId},
+      {$pull: {OwnerOfGroup: GroupId}}
     );
 
-    // Deletes the groupId from the group array of each user in the group's students array.
+    // Deletes the GroupId from the group array of each user in the group's Students array.
     const result2 = await db.collection('Users').updateMany(
-      {UserId: {$in: students}},
-      {$pull: {Group: groupId}}
+      {UserId: {$in: Students}},
+      {$pull: {Group: GroupId}}
     );
 
     // Deletes the group from the groups collection.
     const result3 = await db.collection('Groups').deleteOne(
-      {GroupId: groupId}
+      {GroupId: GroupId}
     );
   }
   catch(e) {
@@ -400,6 +430,8 @@ app.post('/api/deletegroup', async (req, res, next) =>
   else
     res.status(600).json(ret);
 });
+
+app.post('/api/addclass')
 
 app.use((req, res, next) => 
 {
