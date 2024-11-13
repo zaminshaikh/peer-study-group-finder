@@ -67,7 +67,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
 
       try {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        String? userId = prefs.getString('userId');
+        int? userId = prefs.getInt('userId');
 
         if (userId == null) {
           ScaffoldMessenger.of(context).showSnackBar(
