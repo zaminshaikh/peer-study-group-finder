@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";;
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import SideBar from "../components/SideBar";
 import StudyGroupList from "../components/dashboard/GroupList";
 import StudyGroupDetail from "../components/dashboard/GroupDetails";
 import CreateGroupModal from "../components/dashboard/CreateGroupModal";
 import FilterModal from "../components/dashboard/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { PlusCircleIcon } from "lucide-react";
-import SideBar from "../components/SideBar";
 
 interface StudyGroup {
   id: string;
@@ -17,24 +18,57 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
+  groupId: number;
+  students: number[];
+}
+
+interface Filters {
+  modalities: string[];
+  maxSize: number;
 }
 
 const StudyGroupDashboard = () => {
+  const navigate = useNavigate();
+  const [userId, setUserId] = useState<number | null>(null);
   const [groups, setGroups] = useState<StudyGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<StudyGroup | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState({
-    modalities: [] as string[],
+  const [filters, setFilters] = useState<Filters>({
+    modalities: [],
     maxSize: 200,
   });
   const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // checking for authentication
   useEffect(() => {
+    const storedUserId = localStorage.getItem("userId");
+    if (!storedUserId) {
+      navigate("/login");
+      return;
+    }
+    setUserId(parseInt(storedUserId));
+    setIsLoading(false);
+  }, [navigate]);
+
+  // fetching groups when userId is available
+  useEffect(() => {
+    if (userId) {
+      fetchGroups();
+    }
+  }, [userId]);
+
+  const refreshGroups = async () => {
+    setIsLoading(true);
     fetchGroups();
-  }, []);
+    setIsLoading(false);
+  };
 
   const fetchGroups = async () => {
+    //setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch("http://localhost:5000/api/searchgroups", {
         method: "POST",
@@ -42,10 +76,15 @@ const StudyGroupDashboard = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          UserId: "your-user-id", // Replace with the actual user ID
+          UserId: userId,
           Search: "",
         }),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch groups");
+      }
+
       const data = await response.json();
 
       const groupDetails = await Promise.all(
@@ -61,7 +100,13 @@ const StudyGroupDashboard = () => {
               },
             }
           );
+
+          if (!groupResponse.ok) {
+            throw new Error(`Failed to fetch details for group: ${name}`);
+          }
+
           const groupData = await groupResponse.json();
+
           return {
             id: name,
             name,
@@ -72,6 +117,8 @@ const StudyGroupDashboard = () => {
             location: groupData.location,
             meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
+            groupId: groupData.groupId,
+            students: groupData.students || [],
           };
         })
       );
@@ -79,12 +126,44 @@ const StudyGroupDashboard = () => {
       setGroups(groupDetails);
     } catch (error) {
       console.error("Error fetching groups:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred while fetching groups"
+      );
+    } finally {
+      //setIsLoading(false);
+    }
+  };
+
+  // Handler for updating group data when membership changes
+  const handleGroupUpdate = (updatedGroup: StudyGroup) => {
+    setGroups((prevGroups) =>
+      prevGroups.map((group) =>
+        group.groupId === updatedGroup.groupId ? updatedGroup : group
+      )
+    );
+
+    // Update selected group if it's the one being modified
+    if (selectedGroup?.groupId === updatedGroup.groupId) {
+      setSelectedGroup(updatedGroup);
     }
   };
 
   const handleCreateGroup = (newGroup: StudyGroup) => {
-    setGroups([...groups, newGroup]);
+    setGroups((prev) => [...prev, newGroup]);
     setShowCreateGroupModal(false);
+    refreshGroups(); // Refresh the groups list after creating a new group
+  };
+
+  const handleJoinSuccess = () => {
+    refreshGroups(); // Refresh groups to get updated data
+    console.log("successfully joined group");
+  };
+
+  const handleLeaveSuccess = () => {
+    refreshGroups(); // Refresh groups to get updated data
+    console.log("successfully left group");
   };
 
   const handleModalityChange = (modality: string) => {
@@ -108,18 +187,30 @@ const StudyGroupDashboard = () => {
     return matchesSearch && matchesModality && matchesSize;
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-black/80 items-center justify-center">
+        <div className="text-yellow-400">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-black/80">
-      {/* Sidebar */}
       <SideBar />
 
-      {/* Main Content */}
       <div className="flex-grow p-6 ml-20">
         <div className="max-w-6xl mx-auto">
+          {error && (
+            <div className="bg-red-500 text-white p-4 rounded mb-4">
+              {error}
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
               Find Your Study Group
-            </h1>{" "}
+            </h1>
             <div className="flex gap-2">
               <button
                 className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
@@ -151,6 +242,7 @@ const StudyGroupDashboard = () => {
             <CreateGroupModal
               onCreateGroup={handleCreateGroup}
               setShowCreateGroupModal={setShowCreateGroupModal}
+              userId={userId || 0}
             />
           )}
 
@@ -159,7 +251,7 @@ const StudyGroupDashboard = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search Groups..."
+                  placeholder="Search Groups by name or class code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded pl-10"
@@ -176,7 +268,13 @@ const StudyGroupDashboard = () => {
               />
 
               {selectedGroup && (
-                <StudyGroupDetail group={selectedGroup} userId={0} />
+                <StudyGroupDetail
+                  group={selectedGroup}
+                  UserId={userId || 0}
+                  onGroupUpdate={handleGroupUpdate}
+                  onJoinSuccess={handleJoinSuccess}
+                  onLeaveSuccess={handleLeaveSuccess}
+                />
               )}
             </div>
           </div>

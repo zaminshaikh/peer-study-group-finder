@@ -27,23 +27,32 @@ app.post('/api/login', async (req, res, next) =>
   const db = client.db('PeerGroupFinder');
   const results = await db.collection('Users').find({ Email: Email, Password: Password }).toArray();
 
-  let id = -1;
-  let fn = '';
-  let ln = '';
-  let displayName = '';
-  let group = [];
+  let UserId = -1;
+  let FirstName = '';
+  let LastName = '';
+  let DisplayName = '';
+  let Group = [];
 
   if (results.length > 0) {
-    id = results[0].UserId;
-    fn = results[0].FirstName;
-    ln = results[0].LastName;
-    displayName = results[0].DisplayName;
-    group = results[0].Group || []; // Ensure Groups is an array
+    UserId = results[0].UserId;
+    FirstName = results[0].FirstName;
+    LastName = results[0].LastName;
+    DisplayName = results[0].DisplayName;
+    Group = results[0].Group || []; // Ensure Groups is an array
   } else {
     error = 'Invalid Email or Password';
   }
 
-  const ret = { UserId:id, FirstName:fn, LastName:ln, DisplayName: displayName, Group: group, error:error};
+  const ret = { 
+    UserId,
+    Email, 
+    FirstName, 
+    LastName, 
+    DisplayName, 
+    Group, 
+    error 
+  };
+  
   res.status(200).json(ret);
 });
 
@@ -81,6 +90,8 @@ app.post('/api/register', async (req, res, next) =>
   catch(e)
   {
     error = e.toString();
+    res.status(600).json({error:error});
+    return;
   }
 
   const msg = {
@@ -98,7 +109,7 @@ app.post('/api/register', async (req, res, next) =>
     .catch((error) => {
       console.error(error)
     })
-
+    console.log(user.UserId)
   var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
 });
@@ -307,6 +318,7 @@ app.post('/api/fetchgroups', async (req, res, next) => {
 
     // Fetch all groups without any filters
     const groups = await groupsCollection.find({}).toArray();
+    console.log('Fetched groups:', groups);
 
     res.status(200).json({ results: groups });
   } catch (error) {

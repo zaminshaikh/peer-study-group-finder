@@ -10,6 +10,8 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
+  groupId: number;
+  students: number[]; // Added this field to match DashboardPage.tsx
 }
 
 interface StudyGroupListProps {

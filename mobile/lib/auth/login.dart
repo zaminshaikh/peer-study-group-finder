@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/components/custom_text_field.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/models/user_model.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,14 +17,19 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isLoading = false;
 
   void handleLogin() async {
     const String apiUrl = 'http://10.0.2.2:8000/api/login';
 
     final Map<String, dynamic> requestBody = {
-      'Email': emailController.text,
+      'Email': emailController.text.trim(),
       'Password': passwordController.text,
     };
+
+    setState(() {
+      isLoading = true;
+    });
 
     try {
       final response = await http.post(
@@ -36,18 +42,30 @@ class _LoginPageState extends State<LoginPage> {
         final responseData = jsonDecode(response.body);
 
         if (responseData['error'] == '') {
+          // Create User object from response
+          User user = User.fromJson({
+            'UserId': responseData['UserId'],
+            'FirstName': responseData['FirstName'],
+            'LastName': responseData['LastName'],
+            'DisplayName': responseData['DisplayName'],
+            'Email': responseData['Email'],
+            'Group': List<String>.from(responseData['Group']),
+          });
+
+          // Serialize User object to JSON string
+          String userJson = jsonEncode(user.toJson());
+
+          // Store the User JSON string in Shared Preferences
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user', userJson);
+
           // Login successful
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Login successful')),
           );
 
-          // Store userId for later use
-          int userId = responseData['id'];
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setInt('userId', userId);
-
-          // Navigate to the dashboard
-          Navigator.pushNamed(context, '/dashboard');
+          // Optionally, navigate to the dashboard
+          await Navigator.pushNamed(context, '/dashboard');
         } else {
           // Show error message from the server
           ScaffoldMessenger.of(context).showSnackBar(
@@ -68,9 +86,13 @@ class _LoginPageState extends State<LoginPage> {
         const SnackBar(
             content: Text('Network error. Please check your connection.')),
       );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     final headlineStyle = Theme.of(context).textTheme.displayLarge;

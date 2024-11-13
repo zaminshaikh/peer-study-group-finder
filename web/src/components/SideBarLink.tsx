@@ -11,9 +11,9 @@ interface Props {
 const SideBarLink = ({ children, name, isOpen, to, onClick }: Props) => {
   return (
     <Link
-      to={to} //Use to prop for navigation
+      to={to}
       className="flex p-1 rounded cursor-pointer stroke-[0.75] hover:stroke-neutral-100 stroke-neutral-400 text-neutral-400 hover:text-neutral-100 place-items-center gap-3 hover:bg-neutral-700/30 transition-colors duration-100"
-      onClick={onClick} //Call the onClick handler if provided
+      onClick={onClick}
     >
       {children}
       {isOpen && (
