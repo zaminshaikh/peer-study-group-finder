@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Input from "../components/Input";
 import { User, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrength";
 
 const SignUpPage = () => {
@@ -11,11 +11,13 @@ const SignUpPage = () => {
   const [DisplayName, setDisplayName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5001/api/register", {
+      const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,10 +32,19 @@ const SignUpPage = () => {
       });
 
       const data = await response.json();
+      console.log("UserId before sending verification request:", data.UserId);
+
       if (data.error) {
-        setError(data.error);
+        setError(data.error); // Set error message if email is already in use or any other issue
+      } else if (data.UserId) {
+        // Store UserId in localStorage or cookies for persistence
+        localStorage.setItem("UserId", data.UserId);
+        //Cookies.set("UserId", data.UserId.toString(), { expires: 1 }); // Store UserId in cookies
+        //setUserId(data.UserId);
+        // sessionStorage.setItem("UserId", data.UserId);
+        navigate("/verify-email", { state: { UserId: data.UserId } }); // Navigate to email verification page
       } else {
-        console.log("User registered successfully");
+        setError("An unexpected error occurred during registration.");
       }
     } catch (err) {
       setError("An error occurred during registration.");
@@ -122,6 +133,7 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-function setError(error: any) {
+
+/*function setError(error: any) {
   throw new Error("Function not implemented.");
-}
+}*/

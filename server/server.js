@@ -116,35 +116,36 @@ app.post('/api/register', async (req, res, next) =>
 
 // Verifies that the user input the correct verification code.
 app.post('/api/verifyemail', async (req, res, next) => {
-
-  // incoming: UserId, InputVerificationCode
-  // outgoing: error
-
-  var error = '';
-
   const { UserId, InputVerificationCode } = req.body;
+  console.log("Request Body:", req.body);
 
   try {
-
     const db = client.db('PeerGroupFinder');
-    const result = await db.collection('Users').findOne({UserId:UserId});
+
+    // Convert UserId to an integer for the query
+    const userIdInt = parseInt(UserId, 10);
+
+    const result = await db.collection('Users').findOne({ UserId: userIdInt });
+
+    if (!result) {
+      console.log("User not found with UserId:", userIdInt);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log("Found user:", result);
 
     const verificationCode = result.VerificationCode;
 
-    if (verificationCode === InputVerificationCode) {
-      res.status(200).json({error:error});
-    }
-    else {
-      error = "Verification code does not match";
-      res.status(600).json({error:error});
+    if (String(verificationCode) === String(InputVerificationCode)) {
+      return res.status(200).json({ error: '' });
+    } else {
+      return res.status(400).json({ error: "Verification code does not match" });
     }
 
+  } catch (e) {
+    console.error("Error during verification:", e);
+    return res.status(500).json({ error: e.toString() });
   }
-  catch (e) {
-    error = e.toString();
-    res.status(600).json({error:error});
-  }
-
 });
 
 // Updates user's verification code with a new code and sends the new code to the user's email.
