@@ -11,7 +11,7 @@ const SignUpPage = () => {
   const [DisplayName, setDisplayName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  //const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -35,7 +35,7 @@ const SignUpPage = () => {
       console.log("UserId before sending verification request:", data.UserId);
 
       if (data.error) {
-        setError(data.error); // Set error message if email is already in use or any other issue
+        //setError(data.error); // Set error message if email is already in use or any other issue
       } else if (data.UserId) {
         // Store UserId in localStorage or cookies for persistence
         localStorage.setItem("UserId", data.UserId);
@@ -44,10 +44,10 @@ const SignUpPage = () => {
         // sessionStorage.setItem("UserId", data.UserId);
         navigate("/verify-email", { state: { UserId: data.UserId } }); // Navigate to email verification page
       } else {
-        setError("An unexpected error occurred during registration.");
+        //setError("An unexpected error occurred during registration.");
       }
     } catch (err) {
-      setError("An error occurred during registration.");
+      //setError("An error occurred during registration.");
       console.error(err);
     }
   };

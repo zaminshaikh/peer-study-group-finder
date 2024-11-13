@@ -11,8 +11,8 @@ import {
 
 const SideBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  //const [userId, setUserId] = useState<number | null>(null);
+  //const [displayName, setDisplayName] = useState<string | null>(null);
   const containerControls = useAnimationControls();
   const svgControls = useAnimationControls();
   const navigate = useNavigate();
@@ -20,14 +20,14 @@ const SideBar = () => {
   useEffect(() => {
     const storedDisplayName = localStorage.getItem("displayName");
     if (storedDisplayName) {
-      setDisplayName(storedDisplayName);
+      //setDisplayName(storedDisplayName);
     }
   }, []);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     if (storedUserId) {
-      setUserId(Number(storedUserId));
+      //setUserId(Number(storedUserId));
     }
   }, []);
 
@@ -51,8 +51,8 @@ const SideBar = () => {
     console.log("removed userId and displayname");
     navigate("/login");
     console.log("navigating to login page");
-    setUserId(null);
-    setDisplayName(null);
+    //setUserId(null);
+    //setDisplayName(null);
   };
 
   const handleDashboardClick = () => {
