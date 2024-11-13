@@ -90,6 +90,8 @@ app.post('/api/register', async (req, res, next) =>
   catch(e)
   {
     error = e.toString();
+    res.status(600).json({error:error});
+    return;
   }
 
   const msg = {
@@ -107,7 +109,7 @@ app.post('/api/register', async (req, res, next) =>
     .catch((error) => {
       console.error(error)
     })
-
+    console.log(user.UserId)
   var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
 });
@@ -462,6 +464,6 @@ app.use((req, res, next) =>
   next();
 });
 
-const server = app.listen(5000); // start Node + Express server on port 5000
+const server = app.listen(8000); // start Node + Express server on port 5000
 
 module.exports = { app, server };

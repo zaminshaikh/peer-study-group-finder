@@ -73,18 +73,18 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
     setState(() => isSubmitting = true);
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? email = prefs.getString('email');
+    final int? userId = prefs.getInt('userId');
 
-    if (email == null) {
+    if (userId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No email found. Please register again.')),
+        const SnackBar(content: Text('No userId found. Please register again.')),
       );
       return;
     }
 
     final apiUrl = 'http://10.0.2.2:8000/api/resendverificationemail';
     final requestBody = {
-      'Email': email,
+      'UserId': userId,
     };
 
     try {
