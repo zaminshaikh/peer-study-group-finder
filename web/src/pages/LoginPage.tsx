@@ -30,9 +30,9 @@ const LoginPage = () => {
       setError(data.error);
     } else {
       // Handle successful registration (e.g., redirect to login or show success message)
-      localStorage.setItem("displayName", data.displayName);
-      localStorage.setItem("userId", data.UserId.toString());
-      console.log("Login successful:", data);
+      //localStorage.setItem("displayName", data.displayName);
+      localStorage.setItem("UserId", data.UserId.toString());
+      console.log("Login successful:");
       navigate("/dashboard");
     }
   };
