@@ -41,7 +41,7 @@ const MyGroups = () => {
 
   // checking for authentication
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
+    const storedUserId = localStorage.getItem("UserId");
     if (!storedUserId) {
       navigate("/login");
       return;
