@@ -20,7 +20,7 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
     setState(() => isSubmitting = true);
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? userId = prefs.getString('userId');
+    final int? userId = prefs.getInt('userId');
 
     if (userId == null) {
       // Handle missing email
