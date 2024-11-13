@@ -33,7 +33,7 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
     final apiUrl = 'http://10.0.2.2:8000/api/verifyemail';
     final requestBody = {
       'UserId': userId,
-      'InputVerificationCode': codeController.text.trim(),
+      'InputVerificationCode': int.parse(codeController.text.trim()),
     };
 
     try {
