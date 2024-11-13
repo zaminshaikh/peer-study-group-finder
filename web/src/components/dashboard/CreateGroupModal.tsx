@@ -9,15 +9,19 @@ import {
   Link as LinkIcon,
   X,
 } from "lucide-react";
+import Select from "react-select";
+import classesData from "../../../classes.json";
 
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;
   setShowCreateGroupModal: (show: boolean) => void;
+  userId: number;
 }
 
 const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onCreateGroup,
   setShowCreateGroupModal,
+  userId,
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -30,6 +34,14 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [meetingTime, setMeetingTime] = useState("");
   const [link, setLink] = useState(""); // New state for the link
   const [errorMessage, setErrorMessage] = useState(""); // State for error message
+
+  // Prepare options for react-select dropdown
+  const classOptions = classesData.departments.flatMap((department) =>
+    department.courses.map((course) => ({
+      value: `${department.code}${course.number}`,
+      label: `${department.code} ${course.number} - ${course.title}`,
+    }))
+  );
 
   const handleCreateGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,24 +62,24 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     }
 
     setErrorMessage(""); // Clear any previous error message
+    console.log("creating group user id: ", userId);
 
     try {
       const response = await fetch("http://localhost:5000/api/addgroup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          Class: class_,
           Name: name,
           Description: description,
-          Class: class_,
-          Owner: 1,
+          Owner: userId,
           Size: size,
           Modality: modality,
-          Link: link, // Include link in API request
+          Link: link,
           Location: location,
           MeetingTime: meetingTime,
         }),
       });
-
       const data = await response.json();
       if (data.error) {
         console.error(data.error);
@@ -79,12 +91,15 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           class: class_,
           size: Number(size),
           modality,
+          owner: userId,
           location: location || undefined,
           link: link || undefined, // Include link in created group
           meetingTime: meetingTime || undefined,
           createdAt: new Date(),
         });
         setShowCreateGroupModal(false);
+        console.log("successfully created group");
+        console.log("owner: ", userId);
       }
     } catch (error) {
       console.error("Error creating group:", error);
@@ -125,13 +140,18 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setName(e.target.value)}
             />
 
-            <Input
-              Icon={Users}
-              type="text"
-              placeholder="Class (e.g., MATH101)"
-              value={class_}
-              onChange={(e) => setClass(e.target.value)}
-            />
+            {/* Searchable dropdown for classes */}
+            <div className="mb-4 relative">
+              <Select
+                options={classOptions}
+                onChange={(selectedOption) =>
+                  setClass(selectedOption?.value || "")
+                }
+                value={classOptions.find((option) => option.value === class_)}
+                placeholder="Select Class"
+              />
+            </div>
+
             <Input
               Icon={Users}
               type="number"
@@ -180,7 +200,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               </select>
             </div>
 
-            {/* Update this Input to a larger field (use a textarea for description) */}
             <div className="mb-4">
               <textarea
                 placeholder="Description"
