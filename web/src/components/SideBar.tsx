@@ -56,8 +56,18 @@ const SideBar = () => {
   };
 
   const handleDashboardClick = () => {
-    window.location.reload();
-    setIsOpen(false);
+    navigate("/dashboard");
+    setIsOpen(true);
+  };
+
+  const handleMyGroupsClick = () => {
+    navigate("/myGroups");
+    setIsOpen(true);
+  };
+
+  const handleProfilePageClick = () => {
+    navigate("/profilePage");
+    setIsOpen(true);
   };
 
   return (
@@ -99,15 +109,25 @@ const SideBar = () => {
         <SideBarLink
           name="Dashboard"
           isOpen={isOpen}
-          to="/home"
+          to="/dashboard"
           onClick={handleDashboardClick}
         >
           <ChartBarIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
-        <SideBarLink name="My Groups" isOpen={isOpen} to="/groups">
+        <SideBarLink
+          name="My Groups"
+          isOpen={isOpen}
+          to="/myGroups"
+          onClick={handleMyGroupsClick}
+        >
           <UserGroupIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
-        <SideBarLink name="Profile" isOpen={isOpen} to="/profile">
+        <SideBarLink
+          name="Profile"
+          isOpen={isOpen}
+          to="/profilePage"
+          onClick={handleProfilePageClick}
+        >
           <UserIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
         <SideBarLink
