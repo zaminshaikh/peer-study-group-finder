@@ -18,8 +18,10 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
-  groupId: number;
-  students: number[];
+  owner?: number | null;
+  link?: string | undefined;
+  groupId?: number | null;
+  students?: number[] | null;
 }
 
 interface Filters {
