@@ -7,6 +7,7 @@ import Input from "../components/Input";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const isLoading = false;
   const navigate = useNavigate();
 
@@ -77,6 +78,9 @@ const LoginPage = () => {
                 Forgot Password?
               </Link>
             </div>
+            {error && (
+              <p className="text-sm text-red-500 mt-[-12px]">{error}</p> // Display error message in red
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

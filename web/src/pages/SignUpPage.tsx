@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Input from "../components/Input";
 import { User, Mail, Lock } from "lucide-react";
@@ -11,11 +11,34 @@ const SignUpPage = () => {
   const [DisplayName, setDisplayName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
+  const [PasswordValid, setPasswordValid] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const validatePassword = (password: string) => {
+    const isStrongPassword =
+      password.length >= 6 && //At least 6 characters
+      /[A-Z]/.test(password) && //Contains uppercase letter
+      /[a-z]/.test(password) && //Contains lowercase letter
+      /\d/.test(password) && //Contains a number
+      /[^A-Za-z0-9]/.test(password); //Contains special character
+
+    setPasswordValid(isStrongPassword); //Update state based on password strength
+  };
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    validatePassword(newPassword); //Validate password on change
+  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    //If password is not valid, prevent form submission
+    if (!PasswordValid) {
+      setError("Password must meet all strength requirements.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
@@ -44,13 +67,18 @@ const SignUpPage = () => {
         // sessionStorage.setItem("UserId", data.UserId);
         navigate("/verify-email", { state: { UserId: data.UserId } }); // Navigate to email verification page
       } else {
-        setError("An unexpected error occurred during registration.");
+        //setError("An unexpected error occurred during registration.");
+        setError("Email is already in use!");
       }
     } catch (err) {
       setError("An error occurred during registration.");
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    validatePassword(Password); // Initial validation on load
+  }, [Password]);
 
   return (
     <div
@@ -105,6 +133,9 @@ const SignUpPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
             <PasswordStrengthMeter password={Password} />
+            {error && (
+              <p className="text-sm text-red-500 mt-2">{error}</p> // Ensure error is styled with red text
+            )}
             <motion.button
               type="submit"
               className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-700 text-white
