@@ -7,6 +7,8 @@ import EmailVerificationPage from "./pages/EmailVerificationPage";
 import StudyGroupDashboard from "./pages/DashboardPage";
 import MyGroups from "./pages/MyGroupsPage";
 import ProfilePage from "./pages/ProfilePage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 
 const App = () => {
   return (
@@ -20,6 +22,8 @@ const App = () => {
           <Route path="/dashboard" element={<StudyGroupDashboard />} />
           <Route path="/myGroups" element={<MyGroups />} />
           <Route path="/profilePage" element={<ProfilePage />} />
+          <Route path="/forgot-Password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-Password" element={<ResetPasswordPage />} />
         </Routes>
       </BrowserRouter>
     </>

@@ -183,31 +183,35 @@ app.post('/api/resendverificationemail', async (req, res, next) => {
   }
 });
 
-app.post('/api/changepassword', async (req, res, next) => {
-  var error = '';
 
-  const {UserId, Password}  = req.body;
+
+app.post('/api/changepassword', async (req, res, next) => {
+  const { UserId, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
   
-  console.log(Password);
+  try {
+    const user = await db.collection('Users').findOne({ UserId: UserId });
+    //console.log("Current Password:", user.Password);
+    //console.log("Attempting to Set Password to:", Password);
 
-  try{
     const response = await db.collection('Users').updateOne(
-      {UserId: UserId},
-      {$set: {Password: Password}}
+      { UserId: UserId },
+      { $set: { Password: Password } }
     );
+    
+    console.log("Response:", response);
+    if (response.modifiedCount === 0) {
+      return res.status(400).json({ error: 'Password was not updated, it may be the same as the current one' });
+    }
 
-    console.log(response.matchedCount);
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error updating password' });
   }
-  catch(e) {
-    error = e.toString();
-  }
-  
-  var ret = {error:''};
-  res.status(200).json(ret);
-
 });
+
 
 // Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
 app.post('/api/addgroup', async (req, res, next) =>
