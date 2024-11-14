@@ -12,8 +12,10 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
-  groupId: number;
-  students: number[];
+  owner?: number | null;
+  link?: string | undefined;
+  groupId?: number | null;
+  students?: number[] | null;
 }
 
 interface StudyGroupDetailProps {
@@ -77,7 +79,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         setIsMember(true);
 
         // Update parent component's state with new group data
-        if (onGroupUpdate) {
+        if (onGroupUpdate && group.students != null) {
           const updatedGroup = {
             ...group,
             students: [...group.students, UserId],
@@ -127,7 +129,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         setIsMember(false);
 
         // Update parent component's state with new group data
-        if (onGroupUpdate) {
+        if (onGroupUpdate && group.students != null) {
           const updatedGroup = {
             ...group,
             students: group.students.filter((id) => id !== UserId),
