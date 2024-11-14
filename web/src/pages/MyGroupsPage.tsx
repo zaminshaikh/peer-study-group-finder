@@ -1,26 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
-import StudyGroupList from "../components/dashboard/GroupList";
-import StudyGroupDetail from "../components/dashboard/GroupDetails";
-import FilterModal from "../components/dashboard/FilterModal";
+import StudyGroupList from "../components/shared/StudyGroupList";
+import GroupDetails from "../components/shared/GroupDetails";
+import CreateGroupModal from "../components/mygroups/CreateGroupModal";
+import FilterModal from "../components/shared/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
-
-interface StudyGroup {
-  id: string;
-  name: string;
-  description: string;
-  class: string;
-  size: number;
-  modality: "In-Person" | "Online" | "Hybrid";
-  location?: string;
-  meetingTime?: string;
-  createdAt: Date;
-  owner?: number | null;
-  link?: string | undefined;
-  groupId?: number | null;
-  students?: number[] | null;
-}
+import { PlusCircleIcon } from "lucide-react";
+import { StudyGroup } from "../components/types";
 
 interface Filters {
   modalities: string[];
@@ -40,6 +27,7 @@ const MyGroups = () => {
     maxSize: 200,
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
   // checking for authentication
   useEffect(() => {
@@ -112,6 +100,8 @@ const MyGroups = () => {
             description: groupData.description,
             class: groupData.class,
             size: groupData.size,
+            link: groupData.link,
+            owner: groupData.owner,
             modality: groupData.modality,
             location: groupData.location,
             meetingTime: groupData.meetingTime,
@@ -127,6 +117,7 @@ const MyGroups = () => {
         group.students.includes(userId || 0)
       );
       setGroups(userGroups);
+      console.log(userGroups);
     } catch (error) {
       console.error("Error fetching groups:", error);
       setError(
@@ -135,6 +126,12 @@ const MyGroups = () => {
           : "An error occurred while fetching groups"
       );
     }
+  };
+
+  const handleCreateGroup = (newGroup: StudyGroup) => {
+    setGroups((prev) => [...prev, newGroup]);
+    setShowCreateGroupModal(false);
+    refreshGroups(); // Refresh the groups list after creating a new group
   };
 
   // Handler for updating group data when membership changes
@@ -202,6 +199,13 @@ const MyGroups = () => {
             <div className="flex gap-2">
               <button
                 className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
+                onClick={() => setShowCreateGroupModal(true)}
+              >
+                <PlusCircleIcon className="h-6 w-6" />
+                Create Group
+              </button>
+              <button
+                className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <FaFilter className="h-4 w-4" />
@@ -216,6 +220,14 @@ const MyGroups = () => {
               handleModalityChange={handleModalityChange}
               setFilters={setFilters}
               setShowFilters={setShowFilters}
+            />
+          )}
+
+          {showCreateGroupModal && (
+            <CreateGroupModal
+              onCreateGroup={handleCreateGroup}
+              setShowCreateGroupModal={setShowCreateGroupModal}
+              userId={userId || 0}
             />
           )}
 
@@ -244,14 +256,16 @@ const MyGroups = () => {
                     groups={filteredGroups}
                     selectedGroup={selectedGroup}
                     setSelectedGroup={setSelectedGroup}
+                    userId={userId || 0}
                   />
 
                   {selectedGroup && (
-                    <StudyGroupDetail
+                    <GroupDetails
                       group={selectedGroup}
                       UserId={userId || 0}
+                      context="mygroups"
                       onGroupUpdate={handleGroupUpdate}
-                      onJoinSuccess={() => {}} // Not needed for MyGroups
+                      onJoinSuccess={() => {}}
                       onLeaveSuccess={handleLeaveSuccess}
                     />
                   )}

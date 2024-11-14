@@ -1,31 +1,19 @@
 import React from "react";
-
-interface StudyGroup {
-  id: string;
-  name: string;
-  description: string;
-  class: string;
-  size: number;
-  modality: "In-Person" | "Online" | "Hybrid";
-  location?: string;
-  meetingTime?: string;
-  createdAt: Date;
-  owner?: number | null;
-  link?: string | undefined;
-  groupId?: number | null;
-  students?: number[] | null;
-}
+import { Crown } from "lucide-react";
+import { StudyGroup } from "../types";
 
 interface StudyGroupListProps {
   groups: StudyGroup[];
   selectedGroup: StudyGroup | null;
   setSelectedGroup: (group: StudyGroup | null) => void;
+  userId: number;
 }
 
 const StudyGroupList: React.FC<StudyGroupListProps> = ({
   groups,
   selectedGroup,
   setSelectedGroup,
+  userId,
 }) => {
   return (
     <div className="w-full space-y-4">
@@ -43,7 +31,17 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
         >
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-bold text-xl text-gray-900">{group.name}</h3>
+              <div className="flex items-center gap-2">
+                {group.owner === userId && (
+                  <Crown
+                    className="h-5 w-5 text-yellow-500"
+                    fill="currentColor"
+                  />
+                )}
+                <h3 className="font-bold text-xl text-gray-900">
+                  {group.name}
+                </h3>
+              </div>
               <p className="text-gray-600 mt-1">{group.class}</p>
             </div>
             <div className="flex items-center space-x-2">

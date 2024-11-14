@@ -11,22 +11,7 @@ import {
 } from "lucide-react";
 import Select from "react-select";
 import classesData from "../../../classes.json";
-
-interface StudyGroup {
-  id: string;
-  name: string;
-  description: string;
-  class: string;
-  size: number;
-  modality: "In-Person" | "Online" | "Hybrid";
-  location?: string;
-  meetingTime?: string;
-  createdAt: Date;
-  owner?: number | null;
-  link?: string | undefined;
-  groupId?: number | null;
-  students?: number[] | null;
-}
+import { StudyGroup } from "../types";
 
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;

@@ -11,18 +11,18 @@ import {
 
 const SideBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [, setUserId] = useState<number | null>(null);
+  //const [displayName, setDisplayName] = useState<string | null>(null);
   const containerControls = useAnimationControls();
   const svgControls = useAnimationControls();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedDisplayName = localStorage.getItem("displayName");
-    if (storedDisplayName) {
-      setDisplayName(storedDisplayName);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedDisplayName = localStorage.getItem("displayName");
+  //   if (storedDisplayName) {
+  //     //setDisplayName(storedDisplayName);
+  //   }
+  // }, []);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
@@ -52,7 +52,7 @@ const SideBar = () => {
     navigate("/login");
     console.log("navigating to login page");
     setUserId(null);
-    setDisplayName(null);
+    // setDisplayName(null);
   };
 
   const handleDashboardClick = () => {

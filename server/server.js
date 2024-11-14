@@ -267,6 +267,7 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     location: group.Location,
     meetingTime: group.MeetingTime,
     link: group.Link,
+    owner: group.Owner,
     modality: group.Modality,
     createdAt: group.createdAt,
     groupId: group.GroupId,
@@ -439,6 +440,92 @@ app.post('/api/deletegroup', async (req, res, next) =>
     res.status(200).json(ret);
   else
     res.status(600).json(ret);
+});
+
+app.post('/api/editgroup', async (req, res, next) => {
+
+  const error = '';
+  
+  const db = client.db('PeerGroupFinder');
+
+  const { UserId, GroupId, Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime } = req.body;
+
+  if (UserId !== Owner) {
+    res.status(600).json({error: "User is not the Owner"});
+    return;
+  }
+
+  try {
+
+    const updateFields = {};
+    if (Class) updateFields.Class = Class;
+    if (Name) updateFields.Name = Name;
+    if (Link) updateFields.Link = Link;
+    if (Modality) updateFields.Modality = Modality;
+    if (Description) updateFields.Description = Description;
+    if (Size) updateFields.Size = Size;
+    if (Location) updateFields.Location = Location;
+    if (MeetingTime) updateFields.MeetingTime = MeetingTime;
+
+    const result = await db.collection('Groups').updateOne(
+      {GroupId:GroupId},
+      {$set: updateFields}
+    );
+
+  }
+  catch (e) {
+    error = e.toString();
+  }
+
+  if (!error) {
+    res.status(200).json({error:error});
+  }
+  else {
+    res.status(600).json({error:error});
+  }
+
+});
+
+app.post('/api/kickstudent', async (req, res, next) => {
+
+  const error = '';
+
+  const db = client.db('PeerGroupFinder');
+
+  const { UserId, GroupId, KickId } = req.body;
+
+  try {
+
+    const result2 = await db.collection('Groups').findOne({GroupId:GroupId});
+    const Owner = result2.Owner;
+
+    if (UserId !== Owner) {
+      res.status(600).json({error: "User is not the Owner"});
+      return;
+    }
+    
+    const result = await db.collection('Groups').updateOne(
+      {GroupId:GroupId},
+      {$pull: {Students:KickId}}
+    );
+
+    const result3 = await db.collection('Users').updateOne(
+      {UserId:KickId},
+      {$pull: {Group:GroupId}}
+    );
+
+  }
+  catch (e) {
+    error = e.toString();
+  }
+
+  if (!error) {
+    res.status(200).json({error:error});
+  }
+  else {
+    res.status(600).json({error:error});
+  }
+
 });
 
 app.post('/api/addclass')
