@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 import { Lock } from "lucide-react";
 import toast from "react-hot-toast";
+import PasswordStrengthMeter from "../components/PasswordStrength";
 
-// Function to make API call to reset password
+//make API call to reset password
 const resetPassword = async (userId: number, password: string) => {
   const response = await fetch("http://localhost:5000/api/changepassword", {
     method: "POST",
@@ -25,17 +26,19 @@ const resetPassword = async (userId: number, password: string) => {
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  //const { token } = useParams();
   const navigate = useNavigate();
+  const [error] = useState("");
   const userId = parseInt(localStorage.getItem("UserId") || "0", 10);
   console.log("userId before sending request:", userId);
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
+
     try {
       await resetPassword(userId, password);
 
@@ -89,7 +92,11 @@ const ResetPasswordPage = () => {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-
+            {/* Password Strength Meter */}
+            <PasswordStrengthMeter password={password} />
+            {error && (
+              <p className="text-sm text-red-500 mt-2">{error}</p> // Ensure error is styled with red text
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

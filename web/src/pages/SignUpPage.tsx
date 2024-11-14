@@ -24,11 +24,6 @@ const SignUpPage = () => {
 
     setPasswordValid(isStrongPassword); //Update state based on password strength
   };
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-    validatePassword(newPassword); //Validate password on change
-  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,16 +53,12 @@ const SignUpPage = () => {
       console.log("UserId before sending verification request:", data.UserId);
 
       if (data.error) {
-        setError(data.error); // Set error message if email is already in use or any other issue
+        setError(data.error); //Set error message if email is already in use or any other issue
       } else if (data.UserId) {
-        // Store UserId in localStorage or cookies for persistence
+        //Store UserId in localStorage
         localStorage.setItem("UserId", data.UserId);
-        //Cookies.set("UserId", data.UserId.toString(), { expires: 1 }); // Store UserId in cookies
-        //setUserId(data.UserId);
-        // sessionStorage.setItem("UserId", data.UserId);
-        navigate("/verify-email", { state: { UserId: data.UserId } }); // Navigate to email verification page
+        navigate("/verify-email", { state: { UserId: data.UserId } }); //Navigate to email verification page
       } else {
-        //setError("An unexpected error occurred during registration.");
         setError("Email is already in use!");
       }
     } catch (err) {
@@ -77,7 +68,7 @@ const SignUpPage = () => {
   };
 
   useEffect(() => {
-    validatePassword(Password); // Initial validation on load
+    validatePassword(Password); //Initial validation
   }, [Password]);
 
   return (
@@ -164,7 +155,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-
-/*function setError(error: any) {
-  throw new Error("Function not implemented.");
-}*/

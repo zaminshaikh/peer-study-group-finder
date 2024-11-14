@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Input from "../components/Input";
-import { ArrowLeft, Loader, Mail } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
