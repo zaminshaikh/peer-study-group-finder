@@ -1,28 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
-import StudyGroupList from "../components/dashboard/GroupList";
-import StudyGroupDetail from "../components/dashboard/GroupDetails";
-import CreateGroupModal from "../components/dashboard/CreateGroupModal";
-import FilterModal from "../components/dashboard/FilterModal";
+import StudyGroupList from "../components/shared/StudyGroupList";
+import GroupDetails from "../components/shared/GroupDetails";
+import FilterModal from "../components/shared/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
-import { PlusCircleIcon } from "lucide-react";
-
-interface StudyGroup {
-  id: string;
-  name: string;
-  description: string;
-  class: string;
-  size: number;
-  modality: "In-Person" | "Online" | "Hybrid";
-  location?: string;
-  meetingTime?: string;
-  createdAt: Date;
-  owner?: number | null;
-  link?: string | undefined;
-  groupId?: number | null;
-  students?: number[] | null;
-}
+import { StudyGroup } from "../components/types";
 
 interface Filters {
   modalities: string[];
@@ -39,7 +22,6 @@ const StudyGroupDashboard = () => {
     modalities: [],
     maxSize: 200,
   });
-  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +98,7 @@ const StudyGroupDashboard = () => {
             class: groupData.class,
             size: groupData.size,
             modality: groupData.modality,
+            owner: groupData.owner,
             location: groupData.location,
             meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
@@ -126,6 +109,7 @@ const StudyGroupDashboard = () => {
       );
 
       setGroups(groupDetails);
+      console.log(groupDetails);
     } catch (error) {
       console.error("Error fetching groups:", error);
       setError(
@@ -150,12 +134,6 @@ const StudyGroupDashboard = () => {
     if (selectedGroup?.groupId === updatedGroup.groupId) {
       setSelectedGroup(updatedGroup);
     }
-  };
-
-  const handleCreateGroup = (newGroup: StudyGroup) => {
-    setGroups((prev) => [...prev, newGroup]);
-    setShowCreateGroupModal(false);
-    refreshGroups(); // Refresh the groups list after creating a new group
   };
 
   const handleJoinSuccess = () => {
@@ -221,13 +199,6 @@ const StudyGroupDashboard = () => {
                 <FaFilter className="h-4 w-4" />
                 Filters
               </button>
-              <button
-                className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
-                onClick={() => setShowCreateGroupModal(true)}
-              >
-                <PlusCircleIcon className="h-6 w-6" />
-                Create Group
-              </button>
             </div>
           </div>
 
@@ -237,14 +208,6 @@ const StudyGroupDashboard = () => {
               handleModalityChange={handleModalityChange}
               setFilters={setFilters}
               setShowFilters={setShowFilters}
-            />
-          )}
-
-          {showCreateGroupModal && (
-            <CreateGroupModal
-              onCreateGroup={handleCreateGroup}
-              setShowCreateGroupModal={setShowCreateGroupModal}
-              userId={userId || 0}
             />
           )}
 
@@ -267,12 +230,14 @@ const StudyGroupDashboard = () => {
                 groups={filteredGroups}
                 selectedGroup={selectedGroup}
                 setSelectedGroup={setSelectedGroup}
+                userId={userId || 0}
               />
 
               {selectedGroup && (
-                <StudyGroupDetail
+                <GroupDetails
                   group={selectedGroup}
                   UserId={userId || 0}
+                  context="dashboard"
                   onGroupUpdate={handleGroupUpdate}
                   onJoinSuccess={handleJoinSuccess}
                   onLeaveSuccess={handleLeaveSuccess}
