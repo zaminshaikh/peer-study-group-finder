@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 // interface Params {
 //   userId: string;
 // }
@@ -65,7 +67,7 @@ const EmailVerificationPage: React.FC = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:5000/api/verifyemail", {
+      const response = await fetch(`${apiUrl}api/verifyemail`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

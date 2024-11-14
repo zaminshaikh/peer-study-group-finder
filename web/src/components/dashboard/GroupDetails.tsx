@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Clock, MapPin, Monitor } from "lucide-react";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface StudyGroup {
   id: string;
   name: string;
@@ -55,7 +57,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/joingroup", {
+      const response = await fetch(`${apiUrl}api/joingroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +107,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/leavegroup", {
+      const response = await fetch(`${apiUrl}api/leavegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
