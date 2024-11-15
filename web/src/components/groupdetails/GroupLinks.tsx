@@ -60,7 +60,7 @@ const GroupLinks: React.FC<GroupLinksProps> = ({
         // showRefLinks section
         <div className="flex items-center justify-center gap-2 text-gray-300 p-3 bg-gray-700 bg-opacity-50 rounded-lg">
           <a
-            href="/mygroups" // Link to MyGroups page
+            href="/dashboard" // Link to MyGroups page
             className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
           >
             Head over to Dashboard to see link

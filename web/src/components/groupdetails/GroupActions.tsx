@@ -112,7 +112,7 @@ const GroupActions: React.FC<GroupActionsProps> = ({
           className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
             bg-blue-500 hover:bg-blue-600 text-white
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-          onClick={() => (window.location.href = "/mygroups")} // or a function to navigate to My Groups
+          onClick={() => (window.location.href = "/dashboard")} // or a function to navigate to My Groups
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
