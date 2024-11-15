@@ -63,7 +63,7 @@ const GroupLinks: React.FC<GroupLinksProps> = ({
             href="/mygroups" // Link to MyGroups page
             className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
           >
-            Head over to MyGroups to see link
+            Head over to Dashboard to see link
           </a>
         </div>
       ) : null}
