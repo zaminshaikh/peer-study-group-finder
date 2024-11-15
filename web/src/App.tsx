@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -19,8 +18,8 @@ const App = () => {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route path="/dashboard" element={<StudyGroupDashboard />} />
-          <Route path="/myGroups" element={<MyGroups />} />
+          <Route path="/dashboard" element={<MyGroups />} />
+          <Route path="/studyGroups" element={<StudyGroupDashboard />} />
           <Route path="/profilePage" element={<ProfilePage />} />
           <Route path="/forgot-Password" element={<ForgotPasswordPage />} />
           <Route path="/reset-Password" element={<ResetPasswordPage />} />

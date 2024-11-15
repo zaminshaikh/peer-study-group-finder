@@ -60,8 +60,8 @@ const SideBar = () => {
     setIsOpen(true);
   };
 
-  const handleMyGroupsClick = () => {
-    navigate("/myGroups");
+  const handleStudyGroupsClick = () => {
+    navigate("/studyGroups");
     setIsOpen(true);
   };
 
@@ -115,10 +115,10 @@ const SideBar = () => {
           <ChartBarIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
         <SideBarLink
-          name="My Groups"
+          name="Study Groups"
           isOpen={isOpen}
-          to="/myGroups"
-          onClick={handleMyGroupsClick}
+          to="/studyGroups"
+          onClick={handleStudyGroupsClick}
         >
           <UserGroupIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
