@@ -258,6 +258,8 @@ const MyGroups = () => {
                       selectedGroup={selectedGroup}
                       setSelectedGroup={setSelectedGroup}
                       userId={userId || 0}
+                      onKickSuccess={refreshGroups}
+                      context="mygroups"
                     />
                   </div>
                   {selectedGroup && (
