@@ -225,14 +225,18 @@ const StudyGroupDashboard = () => {
               </div>
             </div>
 
-            <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
-              <StudyGroupList
-                groups={filteredGroups}
-                selectedGroup={selectedGroup}
-                setSelectedGroup={setSelectedGroup}
-                userId={userId || 0}
-              />
+            <div className="flex space-x-4 w-full h-[calc(100vh-200px)] bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
+              {/* Make the group list scrollable */}
+              <div className="w-full overflow-auto hide-scrollbar">
+                <StudyGroupList
+                  groups={filteredGroups}
+                  selectedGroup={selectedGroup}
+                  setSelectedGroup={setSelectedGroup}
+                  userId={userId || 0}
+                />
+              </div>
 
+              {/* Keep the group details static */}
               {selectedGroup && (
                 <GroupDetails
                   group={selectedGroup}

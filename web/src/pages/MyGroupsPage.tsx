@@ -252,15 +252,14 @@ const MyGroups = () => {
                 </div>
               ) : (
                 <>
-                  <StudyGroupList
-                    groups={filteredGroups}
-                    selectedGroup={selectedGroup}
-                    setSelectedGroup={setSelectedGroup}
-                    userId={userId || 0}
-                    onKickSuccess={refreshGroups}
-                    context="mygroups"
-                  />
-
+                  <div className="w-full overflow-auto hide-scrollbar">
+                    <StudyGroupList
+                      groups={filteredGroups}
+                      selectedGroup={selectedGroup}
+                      setSelectedGroup={setSelectedGroup}
+                      userId={userId || 0}
+                    />
+                  </div>
                   {selectedGroup && (
                     <GroupDetails
                       group={selectedGroup}
