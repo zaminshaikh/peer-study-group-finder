@@ -15,6 +15,34 @@ client.connect();
 const sgMail = require('@sendgrid/mail')
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
+async function sendEmail(msg){
+  console.log("3");
+  await sgMail
+    .send(msg)
+    .then(() => {
+    console.log('Email sent')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+}
+
+async function insertNewVerification(db, user, verificationCode, subject, text){
+  const msg = {
+    to: user.Email, // Change to your recipient
+    from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+    subject: subject,
+    text: text,
+  }
+  console.log("2");
+  sendEmail(msg);
+
+  const response = await db.collection('Users').updateOne(
+    {UserId: user.UserId},
+    {$set: {VerificationCode: verificationCode}}
+  );
+}
+
 app.post('/api/login', async (req, res, next) => 
 {
   // incoming: Email, Password
@@ -101,15 +129,8 @@ app.post('/api/register', async (req, res, next) =>
     text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
   }
   
-  await sgMail
-    .send(msg)
-    .then(() => {
-    console.log('Email sent')
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-    console.log(user.UserId)
+  sendEmail(msg);
+
   var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
 });
@@ -148,49 +169,51 @@ app.post('/api/verifyemail', async (req, res, next) => {
   }
 });
 
-// Updates user's verification code with a new code and sends the new code to the user's email.
 app.post('/api/resendverificationemail', async (req, res, next) => {
-
-  // incoming: UserId
-  // Outgoing: error
 
   var error = '';
 
   const { UserId } = req.body;
+  const db = client.db('PeerGroupFinder');
   const verificationCode = Math.floor(Math.random() * 9000) + 1000;
 
   try {
-    
-    const db = client.db('PeerGroupFinder');
-
-    const user = await db.collection('Users').findOne({ UserId: UserId});
-
-    const msg = {
-      to: user.Email, // Change to your recipient
-      from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-      subject: 'PeerStudyGroupFinder: Resend Email Verification',
-      text: `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
-    }
-    
-    await sgMail
-      .send(msg)
-      .then(() => {
-      console.log('Email sent')
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-
-    const response = await db.collection('Users').updateOne(
-      {UserId: UserId},
-      {$set: {VerificationCode: verificationCode}}
-    );
-
+    const result = await db.collection('Users').findOne({UserId:UserId});
+    const subject = 'PeerStudyGroupFinder: Resend Email Verification';
+    const text = `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, subject, text);
     res.status(200).json({error:error});
   }
   catch (e) {
     error = e.toString();
     res.status(600).json({error:error});
+  }
+});
+
+app.post('/api/forgotpasswordverification', async (req, res, next) => {
+
+  var error = '';
+  const db = client.db('PeerGroupFinder');
+
+  const { Email } = req.body;
+  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+
+  try {
+    const result = await db.collection('Users').findOne({Email:Email});
+    if(result == null){
+      error = "There is no account associated with this email";
+      res.status(200).json({error:error});
+      return;
+    }
+    ;
+    const subject = 'PeerStudyGroupFinder: Forgot Password Verification'
+    const text = `Here is your verification code to change your password: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, subject, text);
+    res.status(200).json({UserId: result.UserId, error:error});
+  }
+  catch (e) {
+    error = e.toString();
+    res.status(600).json({UserId: -1, error:error});
   }
 });
 
@@ -447,6 +470,92 @@ app.post('/api/deletegroup', async (req, res, next) =>
     res.status(200).json(ret);
   else
     res.status(600).json(ret);
+});
+
+app.post('/api/editgroup', async (req, res, next) => {
+
+  const error = '';
+  
+  const db = client.db('PeerGroupFinder');
+
+  const { UserId, GroupId, Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime } = req.body;
+
+  if (UserId !== Owner) {
+    res.status(600).json({error: "User is not the Owner"});
+    return;
+  }
+
+  try {
+
+    const updateFields = {};
+    if (Class) updateFields.Class = Class;
+    if (Name) updateFields.Name = Name;
+    if (Link) updateFields.Link = Link;
+    if (Modality) updateFields.Modality = Modality;
+    if (Description) updateFields.Description = Description;
+    if (Size) updateFields.Size = Size;
+    if (Location) updateFields.Location = Location;
+    if (MeetingTime) updateFields.MeetingTime = MeetingTime;
+
+    const result = await db.collection('Groups').updateOne(
+      {GroupId:GroupId},
+      {$set: updateFields}
+    );
+
+  }
+  catch (e) {
+    error = e.toString();
+  }
+
+  if (!error) {
+    res.status(200).json({error:error});
+  }
+  else {
+    res.status(600).json({error:error});
+  }
+
+});
+
+app.post('/api/kickstudent', async (req, res, next) => {
+
+  const error = '';
+
+  const db = client.db('PeerGroupFinder');
+
+  const { UserId, GroupId, KickId } = req.body;
+
+  try {
+
+    const result2 = await db.collection('Groups').findOne({GroupId:GroupId});
+    const Owner = result2.Owner;
+
+    if (UserId !== Owner) {
+      res.status(600).json({error: "User is not the Owner"});
+      return;
+    }
+    
+    const result = await db.collection('Groups').updateOne(
+      {GroupId:GroupId},
+      {$pull: {Students:KickId}}
+    );
+
+    const result3 = await db.collection('Users').updateOne(
+      {UserId:KickId},
+      {$pull: {Group:GroupId}}
+    );
+
+  }
+  catch (e) {
+    error = e.toString();
+  }
+
+  if (!error) {
+    res.status(200).json({error:error});
+  }
+  else {
+    res.status(600).json({error:error});
+  }
+
 });
 
 app.post('/api/addclass')
