@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             'LastName': responseData['LastName'],
             'DisplayName': responseData['DisplayName'],
             'Email': responseData['Email'],
-            'Group': List<String>.from(responseData['Group']),
+            'Group': List<String?>.from(responseData['Group']),
           });
 
           // Serialize User object to JSON string
