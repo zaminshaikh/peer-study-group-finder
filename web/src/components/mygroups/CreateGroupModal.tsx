@@ -66,7 +66,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     console.log("creating group user id: ", userId);
 
     try {
-      const response = await fetch("http://localhost:5000/api/addgroup", {
+      const response = await fetch(apiUrl + "api/addgroup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

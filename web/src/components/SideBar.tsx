@@ -27,7 +27,7 @@ const SideBar = () => {
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     if (storedUserId) {
-      setUserId(Number(storedUserId));
+      //setUserId(Number(storedUserId));
     }
   }, []);
 

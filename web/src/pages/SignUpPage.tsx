@@ -5,6 +5,8 @@ import { User, Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrength";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const SignUpPage = () => {
   const [FirstName, setFirstName] = useState("");
   const [LastName, setLastName] = useState("");
@@ -35,7 +37,7 @@ const SignUpPage = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/register", {
+      const response = await fetch(`${apiUrl}api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -62,7 +64,7 @@ const SignUpPage = () => {
         setError("Email is already in use!");
       }
     } catch (err) {
-      setError("An error occurred during registration.");
+      //setError("An error occurred during registration.");
       console.error(err);
     }
   };

@@ -4,6 +4,8 @@ import { Mail, Lock, Loader } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +16,7 @@ const LoginPage = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Name:", email);
-    const response = await fetch("http://localhost:5000/api/login", {
+    const response = await fetch(`${apiUrl}api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -112,6 +114,6 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-function setError(error: any) {
+function setError(_error: any) {
   throw new Error("Function not implemented.");
 }

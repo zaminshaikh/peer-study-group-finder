@@ -54,7 +54,7 @@ const StudyGroupDashboard = () => {
     //setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:5000/api/searchgroups", {
+      const response = await fetch(`${apiUrl}api/searchgroups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,7 +74,7 @@ const StudyGroupDashboard = () => {
       const groupDetails = await Promise.all(
         data.results.map(async (name: string) => {
           const groupResponse = await fetch(
-            `http://localhost:5000/api/getgroupdetails?name=${encodeURIComponent(
+            `${apiUrl}api/getgroupdetails?name=${encodeURIComponent(
               name
             )}`,
             {

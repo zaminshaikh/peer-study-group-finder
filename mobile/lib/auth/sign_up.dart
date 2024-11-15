@@ -1,5 +1,6 @@
 // lib/auth/signup_page.dart
 import 'package:flutter/material.dart';
+import 'package:mobile/auth/components/verify_email.dart';
 import '../components/custom_text_field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,6 +16,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isSubmitting = false;
 
   void handleSignUp() async {
     const String apiUrl = 'http://10.0.2.2:8000/api/register';
@@ -28,6 +30,8 @@ class _SignUpPageState extends State<SignUpPage> {
       'Email': emailController.text,
       'Password': passwordController.text,
     };
+
+    setState(() => isSubmitting = true);
 
     try {
       final response = await http.post(
@@ -45,16 +49,20 @@ class _SignUpPageState extends State<SignUpPage> {
               'Registration successful for email: ${emailController.text}');
           // Registration successful
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful')),
+            const SnackBar(
+                content: Text(
+                    'Registration successful. A verification code has been sent to your email.')),
           );
-
-          // Store userId for later use
+                    // Store userId for later use
           int userId = responseData['UserId'];
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setInt('userId', userId);
 
-          // Navigate to the dashboard
-          await Navigator.pushNamed(context, '/dashboard');
+          // Navigate to the verification screen
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VerifyEmailPage()),
+          );
         } else {
           debugPrint(
               'Registration failed with error: ${responseData['error']}');
@@ -79,12 +87,23 @@ class _SignUpPageState extends State<SignUpPage> {
         const SnackBar(
             content: Text('Network error. Please check your connection.')),
       );
+    } finally {
+      setState(() => isSubmitting = false);
     }
   }
 
   @override
+  void dispose() {
+    // Dispose controllers when the widget is removed
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final headlineStyle = Theme.of(context).textTheme.displayLarge;
+    final headlineStyle = Theme.of(context).textTheme.headlineSmall;
 
     return Scaffold(
       appBar: AppBar(
@@ -93,7 +112,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+          padding:
+              const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -119,13 +139,15 @@ class _SignUpPageState extends State<SignUpPage> {
                 obscureText: true,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: handleSignUp,
-                child: const Text('Sign Up'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                ),
-              ),
+              isSubmitting
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: handleSignUp,
+                      child: const Text('Sign Up'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                    ),
               const SizedBox(height: 16),
               Center(
                 child: TextButton(

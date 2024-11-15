@@ -1,19 +1,21 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-interface Params {
-  userId: string;
-}
+const apiUrl = import.meta.env.VITE_API_URL;
+
+// interface Params {
+//   userId: string;
+// }
 
 const EmailVerificationPage: React.FC = () => {
   const [code, setCode] = useState<string[]>(["", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  // const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
 
   const handleChange = (index: number, value: string) => {
     const newCode = [...code];
@@ -65,7 +67,7 @@ const EmailVerificationPage: React.FC = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:5000/api/verifyemail", {
+      const response = await fetch(`${apiUrl}api/verifyemail`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -79,9 +81,9 @@ const EmailVerificationPage: React.FC = () => {
       if (!response.ok) {
         const data = await response.json();
         setError(data.error || "Verification failed");
-        setSuccess(false);
+        // setSuccess(false);
       } else {
-        setSuccess(true);
+        // setSuccess(true);
         setError("");
         localStorage.removeItem("UserId");
         localStorage.removeItem("VerificationCode");

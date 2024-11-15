@@ -15,6 +15,34 @@ client.connect();
 const sgMail = require('@sendgrid/mail')
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
+async function sendEmail(msg){
+  console.log("3");
+  await sgMail
+    .send(msg)
+    .then(() => {
+    console.log('Email sent')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+}
+
+async function insertNewVerification(db, user, verificationCode, subject, text){
+  const msg = {
+    to: user.Email, // Change to your recipient
+    from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+    subject: subject,
+    text: text,
+  }
+  console.log("2");
+  sendEmail(msg);
+
+  const response = await db.collection('Users').updateOne(
+    {UserId: user.UserId},
+    {$set: {VerificationCode: verificationCode}}
+  );
+}
+
 app.post('/api/login', async (req, res, next) => 
 {
   // incoming: Email, Password
@@ -27,23 +55,32 @@ app.post('/api/login', async (req, res, next) =>
   const db = client.db('PeerGroupFinder');
   const results = await db.collection('Users').find({ Email: Email, Password: Password }).toArray();
 
-  let id = -1;
-  let fn = '';
-  let ln = '';
-  let displayName = '';
-  let group = [];
+  let UserId = -1;
+  let FirstName = '';
+  let LastName = '';
+  let DisplayName = '';
+  let Group = [];
 
   if (results.length > 0) {
-    id = results[0].UserId;
-    fn = results[0].FirstName;
-    ln = results[0].LastName;
-    displayName = results[0].DisplayName;
-    group = results[0].Group || []; // Ensure Groups is an array
+    UserId = results[0].UserId;
+    FirstName = results[0].FirstName;
+    LastName = results[0].LastName;
+    DisplayName = results[0].DisplayName;
+    Group = results[0].Group || []; // Ensure Groups is an array
   } else {
     error = 'Invalid Email or Password';
   }
 
-  const ret = { UserId:id, FirstName:fn, LastName:ln, DisplayName: displayName, Group: group, error:error};
+  const ret = { 
+    UserId,
+    Email, 
+    FirstName, 
+    LastName, 
+    DisplayName, 
+    Group, 
+    error 
+  };
+  
   res.status(200).json(ret);
 });
 
@@ -81,6 +118,8 @@ app.post('/api/register', async (req, res, next) =>
   catch(e)
   {
     error = e.toString();
+    res.status(600).json({error:error});
+    return;
   }
 
   const msg = {
@@ -90,14 +129,7 @@ app.post('/api/register', async (req, res, next) =>
     text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
   }
   
-  await sgMail
-    .send(msg)
-    .then(() => {
-    console.log('Email sent')
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+  sendEmail(msg);
 
   var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
@@ -137,44 +169,19 @@ app.post('/api/verifyemail', async (req, res, next) => {
   }
 });
 
-// Updates user's verification code with a new code and sends the new code to the user's email.
 app.post('/api/resendverificationemail', async (req, res, next) => {
-
-  // incoming: UserId
-  // Outgoing: error
 
   var error = '';
 
   const { UserId } = req.body;
+  const db = client.db('PeerGroupFinder');
   const verificationCode = Math.floor(Math.random() * 9000) + 1000;
 
   try {
-    
-    const db = client.db('PeerGroupFinder');
-
-    const user = await db.collection('Users').findOne({ UserId: UserId});
-
-    const msg = {
-      to: user.Email, // Change to your recipient
-      from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-      subject: 'PeerStudyGroupFinder: Resend Email Verification',
-      text: `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
-    }
-    
-    await sgMail
-      .send(msg)
-      .then(() => {
-      console.log('Email sent')
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-
-    const response = await db.collection('Users').updateOne(
-      {UserId: UserId},
-      {$set: {VerificationCode: verificationCode}}
-    );
-
+    const result = await db.collection('Users').findOne({UserId:UserId});
+    const subject = 'PeerStudyGroupFinder: Resend Email Verification';
+    const text = `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, subject, text);
     res.status(200).json({error:error});
   }
   catch (e) {
@@ -183,7 +190,32 @@ app.post('/api/resendverificationemail', async (req, res, next) => {
   }
 });
 
+app.post('/api/forgotpasswordverification', async (req, res, next) => {
 
+  var error = '';
+  const db = client.db('PeerGroupFinder');
+
+  const { Email } = req.body;
+  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+
+  try {
+    const result = await db.collection('Users').findOne({Email:Email});
+    if(result == null){
+      error = "There is no account associated with this email";
+      res.status(200).json({error:error});
+      return;
+    }
+    ;
+    const subject = 'PeerStudyGroupFinder: Forgot Password Verification'
+    const text = `Here is your verification code to change your password: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, subject, text);
+    res.status(200).json({UserId: result.UserId, error:error});
+  }
+  catch (e) {
+    error = e.toString();
+    res.status(600).json({UserId: -1, error:error});
+  }
+});
 
 app.post('/api/changepassword', async (req, res, next) => {
   const { UserId, Password } = req.body;
@@ -313,6 +345,7 @@ app.post('/api/fetchgroups', async (req, res, next) => {
 
     // Fetch all groups without any filters
     const groups = await groupsCollection.find({}).toArray();
+    console.log('Fetched groups:', groups);
 
     res.status(200).json({ results: groups });
   } catch (error) {
