@@ -51,8 +51,37 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
           const SnackBar(content: Text('Email verified successfully!')),
         );
 
-        // Navigate to dashboard
-        Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
+        final String apiUrl = 'http://10.0.2.2:8000/api/login';
+
+        final Map<String, dynamic> loginRequest = {
+          'Email': prefs.getString('email')?.trim() ?? '',
+          'Password': prefs.getString('password') ?? '',
+        };
+
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(loginRequest),
+        );
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          if (responseData['error'] == '') {
+            User user = User.fromJson(responseData['user']);
+            String userJson = jsonEncode(user.toJson());
+            await prefs.setString('user', userJson);
+            Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(responseData['error'])),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Server error. Please try again later.')),
+          );
+        }
+        
       } else {
         // Verification failed
         ScaffoldMessenger.of(context).showSnackBar(

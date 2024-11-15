@@ -5,6 +5,7 @@ import '../components/custom_text_field.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile/models/user_model.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -53,10 +54,25 @@ class _SignUpPageState extends State<SignUpPage> {
                 content: Text(
                     'Registration successful. A verification code has been sent to your email.')),
           );
-                    // Store userId for later use
-          int userId = responseData['UserId'];
+          
+          // Create User object from response
+          User user = User.fromJson({
+            'UserId': responseData['UserId'],
+            'FirstName': responseData['FirstName'],
+            'LastName': responseData['LastName'],
+            'DisplayName': responseData['DisplayName'],
+            'Email': responseData['Email'],
+            'Group': responseData['Group'] != null
+                ? List<String>.from(responseData['Group'])
+                : [],
+          });
+
+          // Serialize User object to JSON string
+          String userJson = jsonEncode(user.toJson());
+
+          // Store the User JSON string in Shared Preferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setInt('userId', userId);
+          await prefs.setString('user', userJson);
 
           // Navigate to the verification screen
           await Navigator.push(

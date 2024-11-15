@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:mobile/models/user_model.dart';
 
 class CreateGroupSheet extends StatefulWidget {
   const CreateGroupSheet({Key? key}) : super(key: key);
@@ -67,15 +68,18 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
 
       try {
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        int? userId = prefs.getInt('userId');
+        String? userJson = prefs.getString('user');
 
-        if (userId == null) {
+        if (userJson == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('User not logged in')),
           );
           Navigator.pop(context);
           return;
         }
+
+        User user = User.fromJson(jsonDecode(userJson));
+        int userId = user.userId;
 
         // Format selected days
         String days = '';
@@ -131,9 +135,21 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
             // Use mainAxisSize to wrap content
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Create Group',
-                style: Theme.of(context).textTheme.titleLarge,
+              // Close button row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Create Group',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               // Group Name
