@@ -189,7 +189,7 @@ const StudyGroupDashboard = () => {
 
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
-              Find Your Study Group
+              Find Study Groups
             </h1>
             <div className="flex gap-2">
               <button
@@ -219,9 +219,9 @@ const StudyGroupDashboard = () => {
                   placeholder="Search Groups by name or class code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded pl-10"
+                  className="w-full p-3 pl-12 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 transition-all duration-200"
                 />
-                <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
+                <FaSearch className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 text-lg" />
               </div>
             </div>
 

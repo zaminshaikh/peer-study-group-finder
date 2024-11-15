@@ -236,15 +236,14 @@ const MyGroups = () => {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Search your groups by name or class code..."
+                  placeholder="Search Groups by name or class code..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded pl-10"
+                  className="w-full p-3 pl-12 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 transition-all duration-200"
                 />
-                <FaSearch className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-500" />
+                <FaSearch className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 text-lg" />
               </div>
             </div>
-
             <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
               {groups.length === 0 ? (
                 <div className="w-full flex items-center justify-center text-white text-lg">
