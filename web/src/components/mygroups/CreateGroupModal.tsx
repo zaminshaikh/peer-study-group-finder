@@ -13,6 +13,8 @@ import Select from "react-select";
 import classesData from "../../../classes.json";
 import { StudyGroup } from "../types";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;
   setShowCreateGroupModal: (show: boolean) => void;

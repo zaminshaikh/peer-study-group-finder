@@ -29,6 +29,7 @@ const SignUpPage = () => {
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
 
     //If password is not valid, prevent form submission
     if (!PasswordValid) {

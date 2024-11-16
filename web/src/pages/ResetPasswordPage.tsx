@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Input from "../components/Input";
 import { Lock } from "lucide-react";
 import toast from "react-hot-toast";
 import PasswordStrengthMeter from "../components/PasswordStrength";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 //make API call to reset password
 const resetPassword = async (userId: number, password: string) => {
-  const response = await fetch("http://localhost:5000/api/changepassword", {
+  const response = await fetch(`${apiUrl}api/changepassword`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ UserId: userId, Password: password }), // Assumes userId is from token
@@ -27,6 +29,7 @@ const ResetPasswordPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
+  const { state } = useLocation();
   const [error] = useState("");
   const userId = parseInt(localStorage.getItem("UserId") || "0", 10);
   console.log("userId before sending request:", userId);
@@ -46,8 +49,18 @@ const ResetPasswordPage = () => {
         "Password reset successfully, redirecting to login page..."
       );
       localStorage.removeItem("UserId");
-      setTimeout(() => {
+
+      /*setTimeout(() => {
         navigate("/login");
+      }, 2000);*/
+      setTimeout(() => {
+        if (state?.fromForgotPassword) {
+          // If coming from forgot password flow, go to login
+          navigate("/reset-password");
+        } else {
+          // If coming from signup or another flow, navigate to login
+          navigate("/login");
+        }
       }, 2000);
     } catch (error) {
       console.error(error);
