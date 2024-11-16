@@ -29,12 +29,31 @@ class _FilterModalSheetState extends State<FilterModalSheet> {
     maxSize = widget.initialMaxSize.toDouble();
   }
 
+  void _clearFilters() {
+    setState(() {
+      selectedModalities.clear();
+      maxSize = 200; // Reset to default maximum size
+    });
+  }
+
+  void _onModalityChanged(String modality, bool? isSelected) {
+    if (isSelected != null) {
+      setState(() {
+        if (isSelected) {
+          selectedModalities.add(modality);
+        } else {
+          selectedModalities.remove(modality);
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
       children: [
-        ListTile(
-          title: const Text(
+        const ListTile(
+          title: Text(
             'Filter Options',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
@@ -43,27 +62,21 @@ class _FilterModalSheetState extends State<FilterModalSheet> {
           title: const Text('In Person'),
           value: selectedModalities.contains('In Person'),
           onChanged: (bool? value) {
-            setState(() {
-              _onModalityChanged('In Person', value);
-            });
+            _onModalityChanged('In Person', value);
           },
         ),
         CheckboxListTile(
           title: const Text('Online'),
           value: selectedModalities.contains('Online'),
           onChanged: (bool? value) {
-            setState(() {
-              _onModalityChanged('Online', value);
-            });
+            _onModalityChanged('Online', value);
           },
         ),
         CheckboxListTile(
           title: const Text('Hybrid'),
           value: selectedModalities.contains('Hybrid'),
           onChanged: (bool? value) {
-            setState(() {
-              _onModalityChanged('Hybrid', value);
-            });
+            _onModalityChanged('Hybrid', value);
           },
         ),
         ListTile(
@@ -84,30 +97,33 @@ class _FilterModalSheetState extends State<FilterModalSheet> {
         ),
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            onPressed: () {
-              widget.onApplyFilters({
-                'modalities': selectedModalities,
-                'maxSize': maxSize.toInt(),
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Apply Filters'),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onApplyFilters({
+                      'modalities': selectedModalities,
+                      'maxSize': maxSize.toInt(),
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Apply Filters'),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    _clearFilters();
+                  },
+                  child: const Text('Clear'),
+                ),
+              ),
+            ],
           ),
         ),
       ],
     );
-  }
-
-  void _onModalityChanged(String modality, bool? isSelected) {
-    if (isSelected != null) {
-      setState(() {
-        if (isSelected) {
-          selectedModalities.add(modality);
-        } else {
-          selectedModalities.remove(modality);
-        }
-      });
-    }
   }
 }
