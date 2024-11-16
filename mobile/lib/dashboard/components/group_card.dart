@@ -1,3 +1,4 @@
+// group_card.dart
 
 import 'package:flutter/material.dart';
 import 'package:mobile/models/study_group_model.dart';
@@ -5,12 +6,14 @@ import 'package:mobile/models/study_group_model.dart';
 class GroupCard extends StatelessWidget {
   final StudyGroup group;
   final bool isJoined; // Indicates if the user has joined the group
+  final bool isOwner;  // Indicates if the user owns the group
   final VoidCallback onTap;
 
   const GroupCard({
     Key? key,
     required this.group,
-    required this.isJoined, // Add isJoined as a required parameter
+    required this.isJoined,
+    required this.isOwner,
     required this.onTap,
   }) : super(key: key);
 
@@ -20,6 +23,7 @@ class GroupCard extends StatelessWidget {
       onTap: onTap,
       child: Stack(
         children: [
+          // The card containing group information
           Card(
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             shape: RoundedRectangleBorder(
@@ -47,7 +51,7 @@ class GroupCard extends StatelessWidget {
                   Row(
                     children: [
                       // Modality
-                      Icon(Icons.device_hub, size: 16),
+                      const Icon(Icons.device_hub, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         group.modality,
@@ -55,7 +59,7 @@ class GroupCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 16),
                       // Size
-                      Icon(Icons.people, size: 16),
+                      const Icon(Icons.people, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         'Size: ${group.size}',
@@ -67,16 +71,29 @@ class GroupCard extends StatelessWidget {
               ),
             ),
           ),
-          // Check Mark Indicator
-          if (isJoined)
-            Positioned(
-              top: 8,
-              right: 24,
-              child: Icon(
-                Icons.check_circle,
-                color: Colors.green,
-              ),
+          // Icons aligned to the right
+          Positioned(
+            top: 8,
+            right: 24,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isOwner)
+                  Image.asset(
+                    'assets/crown_icon.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                if (isOwner && isJoined)
+                  const SizedBox(width: 8), // Spacing between icons
+                if (isJoined)
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

@@ -43,15 +43,14 @@ class DashboardPageState extends State<DashboardPage> {
           user = User.fromJson(userMap);
         });
         fetchGroups();
+        // Optionally, refresh groups or reapply filters here
       } catch (e) {
-        // If there's an error in decoding, navigate to login
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading user data: $e')),
         );
         Navigator.pushReplacementNamed(context, '/');
       }
     } else {
-      // If no user data found, navigate to login
       Navigator.pushReplacementNamed(context, '/');
     }
   }
@@ -85,6 +84,7 @@ class DashboardPageState extends State<DashboardPage> {
             modality: groupData['Modality'] ?? '',
             location: groupData['Location'],
             meetingTime: groupData['MeetingTime'],
+            owner: groupData['Owner'],
           ));
         }
 
@@ -153,10 +153,15 @@ class DashboardPageState extends State<DashboardPage> {
       context: context,
       isScrollControlled: true,
       builder: (_) => GroupDetailsSheet(group: group),
-    ).then((action) {
-      if (action == 'joined' || action == 'left') {
+    ).then((result) async {
+      if (result == 'joined') {
         // Reload user data to reflect changes in group memberships
-        loadUser();
+        await loadUser();
+        // Refresh the UI to show updated join status
+        setState(() {
+          // Optionally, you can reapply filters or refresh groups
+          _applyFilters();
+        });
       }
     });
   }
@@ -172,6 +177,13 @@ class DashboardPageState extends State<DashboardPage> {
     if (user == null) return false;
     return user!.group.contains(groupId);
   }
+
+  bool isUserOwner(int groupOwnerId) {
+    if (user == null) return false;
+    // Ensure both IDs are compared as strings or integers
+    return user!.userId == groupOwnerId;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -233,9 +245,11 @@ class DashboardPageState extends State<DashboardPage> {
                         itemBuilder: (context, index) {
                           final group = filteredGroups[index];
                           bool isJoined = isUserJoined(group.id);
+                          bool isOwner = isUserOwner(group.owner);
                           return GroupCard(
                             group: group,
                             isJoined: isJoined, // Pass the join status
+                            isOwner: isOwner, // Pass the owner status
                             onTap: () {
                               _showGroupDetails(group);
                             },

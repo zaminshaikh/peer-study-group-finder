@@ -39,6 +39,8 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
     }
     return null;
   }
+    // lib/widgets/group_details_sheet.dart
+  
   void joinGroup() async {
     User? user = await loadUser();
     if (user == null) {
@@ -48,9 +50,9 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
       Navigator.pop(context);
       return;
     }
-
+  
     setState(() => isLoading = true);
-
+  
     try {
       String groupId = widget.group.id;
       final response = await http.post(
@@ -58,9 +60,14 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'UserId': user.userId, 'GroupId': groupId}),
       );
-
+  
       if (response.statusCode == 200) {
-        Navigator.pop(context);
+        // Update user's group list locally
+        user.group.add(groupId);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('user', jsonEncode(user.toJson()));
+  
+        Navigator.pop(context, 'joined'); // Return 'joined' status
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Joined group successfully')),
         );
