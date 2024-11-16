@@ -62,7 +62,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://your_server_address/api/joingroup'),
+        Uri.parse('http://10.0.2.2:8000/api/joingroup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'UserId': user!.userId, 'GroupId': widget.group.id}),
       );
@@ -97,7 +97,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://your_server_address/api/leavegroup'),
+        Uri.parse('http://10.0.2.2:8000/api/leavegroup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'UserId': user!.userId, 'GroupId': widget.group.id}),
       );

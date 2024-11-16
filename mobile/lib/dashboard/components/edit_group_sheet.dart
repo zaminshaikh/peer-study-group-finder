@@ -1,11 +1,12 @@
-// lib/dashboard/components/edit_group_modal.dart
+// lib/dashboard/components/edit_group_sheet.dart
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile/models/study_group_model.dart';
-import 'package:mobile/models/user_model.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:mobile/models/user_model.dart';
+import 'package:mobile/models/study_group_model.dart';
 
 class EditGroupSheet extends StatefulWidget {
   final StudyGroup group;
@@ -18,32 +19,81 @@ class EditGroupSheet extends StatefulWidget {
 
 class _EditGroupSheetState extends State<EditGroupSheet> {
   final _formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final locationController = TextEditingController();
+  final meetingTimeController = TextEditingController();
 
-  late TextEditingController nameController;
-  late TextEditingController classController;
-  late TextEditingController descriptionController;
-  late TextEditingController sizeController;
-  String modality = 'In Person';
-  late TextEditingController locationController;
-  late TextEditingController meetingTimeController;
+  bool isSubmitting = false;
 
-  bool isLoading = false;
+  String? selectedClass;
+  List<String> classesList = [];
 
-  final List<String> modalities = ['In Person', 'Online', 'Hybrid'];
+  int groupSize = 2;
+  String selectedModality = 'Hybrid';
+
+  final List<String> modalities = ['Hybrid', 'In Person', 'Online'];
+
+  List<bool> selectedDays = List.filled(7, false);
+  final List<String> weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   User? user;
 
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.group.name);
-    classController = TextEditingController(text: widget.group.className);
-    descriptionController = TextEditingController(text: widget.group.description);
-    sizeController = TextEditingController(text: widget.group.size.toString());
-    modality = widget.group.modality;
-    locationController = TextEditingController(text: widget.group.location ?? '');
-    meetingTimeController = TextEditingController(text: widget.group.meetingTime ?? '');
+    loadClasses();
+
+    nameController.text = widget.group.name;
+    descriptionController.text = widget.group.description;
+    locationController.text = widget.group.location ?? '';
+    meetingTimeController.text = widget.group.meetingTime ?? '';
+    selectedClass = widget.group.className;
+    groupSize = widget.group.size;
+    selectedModality = widget.group.modality;
+
+    parseMeetingTime();
+
     loadUser();
+  }
+
+  void parseMeetingTime() {
+    String? meetingTime = widget.group.meetingTime;
+    if (meetingTime != null && meetingTime.isNotEmpty) {
+      List<String> parts = meetingTime.trim().split(' ');
+      List<String> days = [];
+      String time = '';
+      for (var part in parts) {
+        if (weekdays.contains(part)) {
+          days.add(part);
+        } else {
+          time = part;
+        }
+      }
+      for (int i = 0; i < weekdays.length; i++) {
+        if (days.contains(weekdays[i])) {
+          selectedDays[i] = true;
+        }
+      }
+      meetingTimeController.text = time;
+    }
+  }
+
+  Future<void> loadClasses() async {
+    final jsonString = await rootBundle.loadString('assets/classes.json');
+    final data = jsonDecode(jsonString);
+
+    List<String> classList = [];
+    for (var department in data['departments']) {
+      for (var course in department['courses']) {
+        String classCode =
+            '${department['code']} ${course['number']} - ${course['title']}';
+        classList.add(classCode);
+      }
+    }
+    setState(() {
+      classesList = classList;
+    });
   }
 
   Future<void> loadUser() async {
@@ -62,9 +112,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   @override
   void dispose() {
     nameController.dispose();
-    classController.dispose();
     descriptionController.dispose();
-    sizeController.dispose();
     locationController.dispose();
     meetingTimeController.dispose();
     super.dispose();
@@ -73,24 +121,30 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
   void updateGroup() async {
     if (!_formKey.currentState!.validate() || user == null) return;
 
-    setState(() => isLoading = true);
+    setState(() => isSubmitting = true);
 
     try {
+      String days = '';
+      for (int i = 0; i < selectedDays.length; i++) {
+        if (selectedDays[i]) {
+          days += weekdays[i] + ' ';
+        }
+      }
+
       final response = await http.post(
-        Uri.parse('http://your_server_address/api/editgroup'),
+        Uri.parse('http://10.0.2.2:8000/api/editgroup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'UserId': user!.userId,
           'GroupId': widget.group.id,
-          'Class': classController.text,
+          'Class': selectedClass,
           'Name': nameController.text,
           'Owner': widget.group.owner,
-          'Modality': modality,
+          'Modality': selectedModality,
           'Description': descriptionController.text,
-          'Size': int.parse(sizeController.text),
+          'Size': groupSize,
           'Location': locationController.text,
-          'MeetingTime': meetingTimeController.text,
-          // Include other fields if necessary
+          'MeetingTime': days + meetingTimeController.text,
         }),
       );
 
@@ -110,106 +164,173 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
         SnackBar(content: Text('An error occurred: $e')),
       );
     } finally {
-      setState(() => isLoading = false);
+      setState(() => isSubmitting = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      child: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Edit Group',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Group Name'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a group name';
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      controller: classController,
-                      decoration: const InputDecoration(labelText: 'Class'),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a class';
-                        }
-                        return null;
-                      },
-                    ),
-                    TextFormField(
-                      controller: descriptionController,
-                      decoration: const InputDecoration(labelText: 'Description'),
-                      maxLines: 3,
-                    ),
-                    TextFormField(
-                      controller: sizeController,
-                      decoration: const InputDecoration(labelText: 'Group Size'),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter group size';
-                        }
-                        if (int.tryParse(value) == null) {
-                          return 'Please enter a valid number';
-                        }
-                        return null;
-                      },
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: modality,
-                      items: modalities.map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      decoration: const InputDecoration(labelText: 'Modality'),
-                      onChanged: (val) {
-                        setState(() {
-                          modality = val!;
-                        });
-                      },
-                    ),
-                    TextFormField(
-                      controller: locationController,
-                      decoration: const InputDecoration(labelText: 'Location'),
-                    ),
-                    TextFormField(
-                      controller: meetingTimeController,
-                      decoration: const InputDecoration(labelText: 'Meeting Time'),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: updateGroup,
-                        child: const Text('Save Changes'),
-                      ),
-                    ),
-                  ],
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Edit Group',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Group Name'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Group name is required' : null,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: selectedClass,
+                decoration: const InputDecoration(labelText: 'Class'),
+                items: classesList.map((String classItem) {
+                  return DropdownMenuItem<String>(
+                    value: classItem,
+                    child: Text(classItem),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedClass = value;
+                  });
+                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Class is required' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Description'),
+                validator: (value) =>
+                    value!.isEmpty ? 'Description is required' : null,
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Group Size',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Slider(
+                    value: groupSize.toDouble(),
+                    min: 2,
+                    max: 100,
+                    divisions: 98,
+                    label: groupSize.toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        groupSize = value.toInt();
+                      });
+                    },
+                  ),
+                  Text('Selected Size: $groupSize'),
+                ],
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                isExpanded: true,
+                value: selectedModality,
+                decoration: const InputDecoration(labelText: 'Modality'),
+                items: modalities.map((String modality) {
+                  return DropdownMenuItem<String>(
+                    value: modality,
+                    child: Text(modality),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedModality = value!;
+                  });
+                },
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Modality is required' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: locationController,
+                decoration: const InputDecoration(labelText: 'Location'),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Meeting Days',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
-            ),
+              Wrap(
+                spacing: 8.0,
+                children: List<Widget>.generate(7, (int index) {
+                  return FilterChip(
+                    label: Text(weekdays[index]),
+                    selected: selectedDays[index],
+                    onSelected: (bool selected) {
+                      setState(() {
+                        selectedDays[index] = selected;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: meetingTimeController,
+                readOnly: true,
+                decoration: const InputDecoration(
+                  labelText: 'Meeting Time',
+                  hintText: 'Select Meeting Time',
+                ),
+                onTap: () async {
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (time != null) {
+                    setState(() {
+                      meetingTimeController.text = time.format(context);
+                    });
+                  }
+                },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Meeting time is required'
+                    : null,
+              ),
+              const SizedBox(height: 24),
+              isSubmitting
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                      onPressed: updateGroup,
+                      child: const Text('Save Changes'),
+                    ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
