@@ -7,7 +7,7 @@ import 'package:mobile/dashboard/components/filter_modal_sheet.dart';
 import 'package:mobile/dashboard/components/group_card.dart';
 import 'package:mobile/dashboard/components/group_details_sheet.dart';
 import 'package:mobile/models/study_group_model.dart';
-import 'package:mobile/models/user_model.dart'; // Import the User model
+import 'package:mobile/models/user_model.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,7 +43,6 @@ class DashboardPageState extends State<DashboardPage> {
           user = User.fromJson(userMap);
         });
         fetchGroups();
-        // Optionally, refresh groups or reapply filters here
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading user data: $e')),
@@ -88,10 +87,34 @@ class DashboardPageState extends State<DashboardPage> {
           ));
         }
 
+        // Sort groups: owner's groups first, then joined groups, then the rest
+        groupList.sort((a, b) {
+          // Check if current user is the owner of the group
+          bool aIsOwner = isUserOwner(a.owner);
+          bool bIsOwner = isUserOwner(b.owner);
+
+          // Check if current user has joined the group
+          bool aIsJoined = isUserJoined(a.id, a.owner);
+          bool bIsJoined = isUserJoined(b.id, b.owner);
+
+          if (aIsOwner && !bIsOwner) {
+            return -1;
+          } else if (!aIsOwner && bIsOwner) {
+            return 1;
+          } else if (aIsJoined && !bIsJoined) {
+            return -1;
+          } else if (!aIsJoined && bIsJoined) {
+            return 1;
+          } else {
+            return 0;
+          }
+        });
+
         setState(() {
           groups = groupList;
-          filteredGroups = groupList; // Initially, all groups are shown
+          filteredGroups = groupList;
           isLoading = false;
+          _applyFilters(); // Apply filters after sorting
         });
       } else {
         throw Exception('Failed to load groups');
@@ -107,6 +130,18 @@ class DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  /// Determines if the user has joined a particular group
+  bool isUserJoined(String groupId, int groupOwnerId) {
+    if (user == null) return false;
+    return user!.userId != groupOwnerId && user!.group.contains(groupId);
+  }
+
+  /// Determines if the user is the owner of a particular group
+  bool isUserOwner(int groupOwnerId) {
+    if (user == null) return false;
+    return user!.userId == groupOwnerId;
+  }
+
   /// Applies the selected filters to the list of groups
   void _applyFilters() {
     setState(() {
@@ -115,8 +150,14 @@ class DashboardPageState extends State<DashboardPage> {
             selectedFilters['modalities'].isEmpty ||
             selectedFilters['modalities'].contains(group.modality);
         final matchesSize = group.size <= (selectedFilters['maxSize'] ?? 200);
+        final matchesSearch = group.name
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase()) ||
+            group.description
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase());
 
-        return matchesModality && matchesSize;
+        return matchesModality && matchesSize && matchesSearch;
       }).toList();
     });
   }
@@ -154,12 +195,11 @@ class DashboardPageState extends State<DashboardPage> {
       isScrollControlled: true,
       builder: (_) => GroupDetailsSheet(group: group),
     ).then((result) async {
-      if (result == 'joined') {
+      if (result == 'joined' || result == 'left') {
         // Reload user data to reflect changes in group memberships
         await loadUser();
         // Refresh the UI to show updated join status
         setState(() {
-          // Optionally, you can reapply filters or refresh groups
           _applyFilters();
         });
       }
@@ -171,19 +211,6 @@ class DashboardPageState extends State<DashboardPage> {
     searchController.dispose();
     super.dispose();
   }
-
-  /// Determines if the user has joined a particular group
-  bool isUserJoined(String groupId) {
-    if (user == null) return false;
-    return user!.group.contains(groupId);
-  }
-
-  bool isUserOwner(int groupOwnerId) {
-    if (user == null) return false;
-    // Ensure both IDs are compared as strings or integers
-    return user!.userId == groupOwnerId;
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -228,8 +255,6 @@ class DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               onChanged: (value) {
-                // Implement search functionality if needed
-                // For now, refetch groups or filter locally
                 _applyFilters();
               },
             ),
@@ -244,12 +269,12 @@ class DashboardPageState extends State<DashboardPage> {
                         itemCount: filteredGroups.length,
                         itemBuilder: (context, index) {
                           final group = filteredGroups[index];
-                          bool isJoined = isUserJoined(group.id);
+                          bool isJoined = isUserJoined(group.id, group.owner);
                           bool isOwner = isUserOwner(group.owner);
                           return GroupCard(
                             group: group,
-                            isJoined: isJoined, // Pass the join status
-                            isOwner: isOwner, // Pass the owner status
+                            isJoined: isJoined,
+                            isOwner: isOwner,
                             onTap: () {
                               _showGroupDetails(group);
                             },
