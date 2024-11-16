@@ -1,5 +1,7 @@
-// lib/widgets/group_details_sheet.dart
+// lib/dashboard/components/group_details_sheet.dart
+
 import 'package:flutter/material.dart';
+import 'package:mobile/dashboard/components/edit_group_sheet.dart';
 import 'package:mobile/models/study_group_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobile/models/user_model.dart';
@@ -17,57 +19,60 @@ class GroupDetailsSheet extends StatefulWidget {
 
 class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
   bool isLoading = false;
+  User? user;
 
-  Future<User?> loadUser() async {
+  @override
+  void initState() {
+    super.initState();
+    loadUser();
+  }
+
+  Future<void> loadUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString('user');
     if (userJson != null) {
       try {
         Map<String, dynamic> userMap = jsonDecode(userJson);
-        return User.fromJson(userMap);
+        setState(() {
+          user = User.fromJson(userMap);
+        });
       } catch (e) {
-        // If there's an error in decoding, navigate to login
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading user data: $e')),
         );
         Navigator.pushReplacementNamed(context, '/');
       }
     } else {
-      // If no user data found, navigate to login
       Navigator.pushReplacementNamed(context, '/');
-      return null;
     }
-    return null;
   }
-    // lib/widgets/group_details_sheet.dart
-  
+
+  bool isUserOwner() {
+    return user != null && user!.userId == widget.group.owner;
+  }
+
+  bool isUserJoined() {
+    return user != null && user!.group.contains(widget.group.id);
+  }
+
   void joinGroup() async {
-    User? user = await loadUser();
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not logged in')),
-      );
-      Navigator.pop(context);
-      return;
-    }
-  
+    if (user == null) return;
+
     setState(() => isLoading = true);
-  
+
     try {
-      String groupId = widget.group.id;
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/joingroup'),
+        Uri.parse('http://your_server_address/api/joingroup'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'UserId': user.userId, 'GroupId': groupId}),
+        body: jsonEncode({'UserId': user!.userId, 'GroupId': widget.group.id}),
       );
-  
+
       if (response.statusCode == 200) {
-        // Update user's group list locally
-        user.group.add(groupId);
+        user!.group.add(widget.group.id);
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('user', jsonEncode(user.toJson()));
-  
-        Navigator.pop(context, 'joined'); // Return 'joined' status
+        prefs.setString('user', jsonEncode(user!.toJson()));
+
+        Navigator.pop(context, 'joined');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Joined group successfully')),
         );
@@ -85,14 +90,58 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
     }
   }
 
+  void leaveGroup() async {
+    if (user == null) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://your_server_address/api/leavegroup'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'UserId': user!.userId, 'GroupId': widget.group.id}),
+      );
+
+      if (response.statusCode == 200) {
+        user!.group.remove(widget.group.id);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('user', jsonEncode(user!.toJson()));
+
+        Navigator.pop(context, 'left');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Left group successfully')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to leave group')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void editGroup() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => EditGroupSheet(group: widget.group),
+    );
+    Navigator.pop(context, 'edited');
+  }
+
   @override
   Widget build(BuildContext context) {
     final group = widget.group;
     final screenHeight = MediaQuery.of(context).size.height;
-  
+
     return SizedBox(
-      height: screenHeight * 0.6, // Half the screen height
-      width: double.infinity, // Full horizontal width
+      height: screenHeight * 0.6,
+      width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: isLoading
@@ -104,7 +153,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                     group.name,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  const SizedBox(height: 16), // Increased spacing
+                  const SizedBox(height: 16),
                   // Class
                   Row(
                     children: [
@@ -120,82 +169,37 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                   ),
                   const SizedBox(height: 12),
                   // Description
-                  Row(
-                    children: [
-                      const Icon(Icons.description),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Description: ${group.description}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Size
-                  Row(
-                    children: [
-                      const Icon(Icons.people),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Size: ${group.size}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Modality
-                  Row(
-                    children: [
-                      const Icon(Icons.device_hub),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Modality: ${group.modality}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  // Location (if available)
-                  if (group.location != null && group.location!.isNotEmpty) ...[
+                  if (group.description.isNotEmpty)
                     Row(
                       children: [
-                        const Icon(Icons.location_on),
+                        const Icon(Icons.description),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Location: ${group.location}',
+                            'Description: ${group.description}',
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                  // Meeting Time (if available)
-                  if (group.meetingTime != null &&
-                      group.meetingTime!.isNotEmpty) ...[
-                    Row(
-                      children: [
-                        const Icon(Icons.schedule),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Meeting Time: ${group.meetingTime}',
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                  ],
-                  const Spacer(), // Pushes the button to the bottom
+                  // [Add other group details as needed]
+
+                  const Spacer(),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: joinGroup,
-                      child: const Text('Join Group'),
+                      onPressed: isUserOwner()
+                          ? editGroup
+                          : isUserJoined()
+                              ? leaveGroup
+                              : joinGroup,
+                      child: Text(
+                        isUserOwner()
+                            ? 'Edit Group'
+                            : isUserJoined()
+                                ? 'Leave Group'
+                                : 'Join Group',
+                      ),
                     ),
                   ),
                 ],
