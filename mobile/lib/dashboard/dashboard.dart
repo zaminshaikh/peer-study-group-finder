@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/auth/onboarding.dart';
 import 'package:mobile/dashboard/components/create_group_sheet.dart';
 import 'package:mobile/dashboard/components/filter_modal_sheet.dart';
 import 'package:mobile/dashboard/components/group_card.dart';
@@ -214,12 +215,30 @@ class DashboardPageState extends State<DashboardPage> {
     super.dispose();
   }
 
+  void _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user');
+    // Navigate back to the onboarding page and remove all previous routes
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const OnboardingPage()),
+      (Route<dynamic> route) => false,
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Study Groups'),
+        automaticallyImplyLeading: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Logout',
+          ),
           IconButton(
             icon: const Icon(Icons.filter_list),
             onPressed: _showFilterModal,

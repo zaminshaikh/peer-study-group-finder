@@ -1,4 +1,5 @@
 // lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile/dashboard/dashboard.dart';
@@ -6,6 +7,7 @@ import 'package:mobile/dashboard/dashboard.dart';
 import 'auth/login.dart';
 import 'auth/onboarding.dart';
 import 'auth/sign_up.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const StudyHiveApp());
@@ -13,6 +15,16 @@ void main() {
 
 class StudyHiveApp extends StatelessWidget {
   const StudyHiveApp({Key? key}) : super(key: key);
+
+  // Function to determine the initial screen
+  Future<Widget> _getInitialPage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey('user')) {
+      return DashboardPage(); // Ensure DashboardPage is a StatefulWidget without const
+    } else {
+      return const OnboardingPage(); // Assuming OnboardingPage is a StatelessWidget or StatefulWidget with const constructor
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +92,30 @@ class StudyHiveApp extends StatelessWidget {
           ),
         ),
       ),
-      initialRoute: '/',
+      // Use FutureBuilder to determine the initial screen
+      home: FutureBuilder<Widget>(
+        future: _getInitialPage(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Loading indicator while determining the initial screen
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          } else if (snapshot.hasError) {
+            // Display error if any
+            return Scaffold(
+              body: Center(child: Text('Error: ${snapshot.error}')),
+            );
+          } else {
+            // Show the appropriate initial screen
+            return snapshot.data!;
+          }
+        },
+      ),
       routes: {
-        '/': (context) => const OnboardingPage(),
-        '/signup': (context) => const SignUpPage(),
-        '/login': (context) => const LoginPage(),
-        '/dashboard': (context) => const DashboardPage(),
+        '/signup': (context) => SignUpPage(), // Ensure SignUpPage is Stateless or Stateful without const
+        '/login': (context) => LoginPage(), // Ensure LoginPage is Stateless or Stateful without const
+        '/dashboard': (context) => DashboardPage(), // Ensure DashboardPage is Stateful without const
       },
     );
   }
