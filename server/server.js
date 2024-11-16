@@ -473,6 +473,8 @@ app.post('/api/deletegroup', async (req, res, next) =>
 
 app.post('/api/editgroup', async (req, res, next) => {
 
+  console.log('Edit group request received');
+
   const error = '';
   
   const db = client.db('PeerGroupFinder');
@@ -496,6 +498,9 @@ app.post('/api/editgroup', async (req, res, next) => {
     if (Location) updateFields.Location = Location;
     if (MeetingTime) updateFields.MeetingTime = MeetingTime;
 
+    console.log(updateFields);
+    console.log(GroupId);
+
     const result = await db.collection('Groups').updateOne(
       {GroupId:GroupId},
       {$set: updateFields}
@@ -507,6 +512,7 @@ app.post('/api/editgroup', async (req, res, next) => {
   }
 
   if (!error) {
+    console.log('Edit group successful');
     res.status(200).json({error:error});
   }
   else {
