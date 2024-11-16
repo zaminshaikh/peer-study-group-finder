@@ -1,4 +1,5 @@
 // lib/auth/login_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:mobile/components/custom_text_field.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +7,6 @@ import 'package:mobile/models/user_model.dart';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -38,53 +38,28 @@ class _LoginPageState extends State<LoginPage> {
         body: jsonEncode(requestBody),
       );
 
+      final responseData = jsonDecode(response.body);
+
       if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
         if (responseData['error'] == '') {
-          // Create User object from response
-          User user = User.fromJson({
-            'UserId': responseData['UserId'],
-            'FirstName': responseData['FirstName'],
-            'LastName': responseData['LastName'],
-            'DisplayName': responseData['DisplayName'],
-            'Email': responseData['Email'],
-            'Group': List<String?>.from(responseData['Group']),
-          });
-
-          // Serialize User object to JSON string
+          User user = User.fromJson(responseData['user']);
           String userJson = jsonEncode(user.toJson());
-
-          // Store the User JSON string in Shared Preferences
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('user', userJson);
-
-          // Login successful
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login successful')),
-          );
-
-          // Optionally, navigate to the dashboard
-          await Navigator.pushNamed(context, '/dashboard');
+          Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
         } else {
-          // Show error message from the server
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(responseData['error'])),
           );
         }
       } else {
-        // Handle server error
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Server error. Please try again later.')),
+          const SnackBar(content: Text('Server error. Please try again later.')),
         );
       }
     } catch (e) {
-      // Handle network error
-      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Network error. Please check your connection.')),
+        const SnackBar(content: Text('Network error. Please check your connection.')),
       );
     } finally {
       setState(() {
@@ -92,10 +67,17 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
   }
-  
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final headlineStyle = Theme.of(context).textTheme.displayLarge;
+    final headlineStyle = Theme.of(context).textTheme.headlineSmall;
 
     return Scaffold(
       appBar: AppBar(
@@ -124,22 +106,23 @@ class _LoginPageState extends State<LoginPage> {
                 icon: Icons.lock_outline,
                 obscureText: true,
               ),
+              const SizedBox(height: 32),
+              isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ElevatedButton(
+                      onPressed: handleLogin,
+                      child: const Text('Login'),
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(50),
+                      ),
+                    ),
               const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.centerRight,
+              Center(
                 child: TextButton(
                   onPressed: () {
-                    // Implement password reset
+                    Navigator.pushNamed(context, '/forgot_password');
                   },
                   child: const Text('Forgot Password?'),
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: handleLogin,
-                child: const Text('Login'),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
                 ),
               ),
               const SizedBox(height: 16),
@@ -148,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () {
                     Navigator.pushNamed(context, '/signup');
                   },
-                  child: const Text("Don't have an account? Sign Up"),
+                  child: const Text('Don\'t have an account? Sign Up'),
                 ),
               ),
             ],

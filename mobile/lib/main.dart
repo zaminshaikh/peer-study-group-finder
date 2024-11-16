@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile/auth/components/forgot_password.dart';
 import 'package:mobile/dashboard/dashboard.dart';
 
 import 'auth/login.dart';
@@ -116,6 +117,7 @@ class StudyHiveApp extends StatelessWidget {
         '/signup': (context) => SignUpPage(), // Ensure SignUpPage is Stateless or Stateful without const
         '/login': (context) => LoginPage(), // Ensure LoginPage is Stateless or Stateful without const
         '/dashboard': (context) => DashboardPage(), // Ensure DashboardPage is Stateful without const
+        '/forgot_password': (context) => const ForgotPasswordPage(), // Register ForgotPasswordPage
       },
     );
   }
