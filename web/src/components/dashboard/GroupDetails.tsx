@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Clock, MapPin, Monitor } from "lucide-react";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface StudyGroup {
   id: string;
   name: string;
@@ -12,8 +14,10 @@ interface StudyGroup {
   location?: string;
   meetingTime?: string;
   createdAt: Date;
-  groupId: number;
-  students: number[];
+  owner?: number | null;
+  link?: string | undefined;
+  groupId?: number | null;
+  students?: number[] | null;
 }
 
 interface StudyGroupDetailProps {
@@ -53,7 +57,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/joingroup", {
+      const response = await fetch(`${apiUrl}api/joingroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -77,7 +81,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         setIsMember(true);
 
         // Update parent component's state with new group data
-        if (onGroupUpdate) {
+        if (onGroupUpdate && group.students != null) {
           const updatedGroup = {
             ...group,
             students: [...group.students, UserId],
@@ -103,7 +107,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/leavegroup", {
+      const response = await fetch(`${apiUrl}api/leavegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +131,7 @@ const StudyGroupDetail: React.FC<StudyGroupDetailProps> = ({
         setIsMember(false);
 
         // Update parent component's state with new group data
-        if (onGroupUpdate) {
+        if (onGroupUpdate && group.students != null) {
           const updatedGroup = {
             ...group,
             students: group.students.filter((id) => id !== UserId),

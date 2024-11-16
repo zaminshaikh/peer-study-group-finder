@@ -4,16 +4,19 @@ import { Mail, Lock, Loader } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const isLoading = false;
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Name:", email);
-    const response = await fetch("http://localhost:5000/api/login", {
+    const response = await fetch(`${apiUrl}api/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -30,9 +33,9 @@ const LoginPage = () => {
       setError(data.error);
     } else {
       // Handle successful registration (e.g., redirect to login or show success message)
-      localStorage.setItem("displayName", data.displayName);
-      localStorage.setItem("userId", data.UserId.toString());
-      console.log("Login successful:", data);
+      //localStorage.setItem("displayName", data.displayName);
+      localStorage.setItem("UserId", data.UserId.toString());
+      console.log("Login successful:");
       navigate("/dashboard");
     }
   };
@@ -77,6 +80,9 @@ const LoginPage = () => {
                 Forgot Password?
               </Link>
             </div>
+            {error && (
+              <p className="text-sm text-red-500 mt-[-12px]">{error}</p> // Display error message in red
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -108,6 +114,6 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-function setError(error: any) {
+function setError(_error: any) {
   throw new Error("Function not implemented.");
 }

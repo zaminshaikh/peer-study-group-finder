@@ -137,35 +137,36 @@ app.post('/api/register', async (req, res, next) =>
 
 // Verifies that the user input the correct verification code.
 app.post('/api/verifyemail', async (req, res, next) => {
-
-  // incoming: UserId, InputVerificationCode
-  // outgoing: error
-
-  var error = '';
-
   const { UserId, InputVerificationCode } = req.body;
+  console.log("Request Body:", req.body);
 
   try {
-
     const db = client.db('PeerGroupFinder');
-    const result = await db.collection('Users').findOne({UserId:UserId});
+
+    // Convert UserId to an integer for the query
+    const userIdInt = parseInt(UserId, 10);
+
+    const result = await db.collection('Users').findOne({ UserId: userIdInt });
+
+    if (!result) {
+      console.log("User not found with UserId:", userIdInt);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log("Found user:", result);
 
     const verificationCode = result.VerificationCode;
 
-    if (verificationCode === InputVerificationCode) {
-      res.status(200).json({error:error});
-    }
-    else {
-      error = "Verification code does not match";
-      res.status(600).json({error:error});
+    if (String(verificationCode) === String(InputVerificationCode)) {
+      return res.status(200).json({ error: '' });
+    } else {
+      return res.status(400).json({ error: "Verification code does not match" });
     }
 
+  } catch (e) {
+    console.error("Error during verification:", e);
+    return res.status(500).json({ error: e.toString() });
   }
-  catch (e) {
-    error = e.toString();
-    res.status(600).json({error:error});
-  }
-
 });
 
 app.post('/api/resendverificationemail', async (req, res, next) => {
@@ -217,30 +218,32 @@ app.post('/api/forgotpasswordverification', async (req, res, next) => {
 });
 
 app.post('/api/changepassword', async (req, res, next) => {
-  var error = '';
-
-  const {UserId, Password}  = req.body;
+  const { UserId, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
   
-  console.log(Password);
+  try {
+    const user = await db.collection('Users').findOne({ UserId: UserId });
+    //console.log("Current Password:", user.Password);
+    //console.log("Attempting to Set Password to:", Password);
 
-  try{
     const response = await db.collection('Users').updateOne(
-      {UserId: UserId},
-      {$set: {Password: Password}}
+      { UserId: UserId },
+      { $set: { Password: Password } }
     );
+    
+    console.log("Response:", response);
+    if (response.modifiedCount === 0) {
+      return res.status(400).json({ error: 'Password was not updated, it may be the same as the current one' });
+    }
 
-    console.log(response.matchedCount);
+    res.status(200).json({ message: 'Password updated successfully' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Error updating password' });
   }
-  catch(e) {
-    error = e.toString();
-  }
-  
-  var ret = {error:''};
-  res.status(200).json(ret);
-
 });
+
 
 // Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
 app.post('/api/addgroup', async (req, res, next) =>
@@ -296,6 +299,7 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     location: group.Location,
     meetingTime: group.MeetingTime,
     link: group.Link,
+    owner: group.Owner,
     modality: group.Modality,
     createdAt: group.createdAt,
     groupId: group.GroupId,

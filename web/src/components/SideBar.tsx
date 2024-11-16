@@ -11,23 +11,23 @@ import {
 
 const SideBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
-  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [, setUserId] = useState<number | null>(null);
+  //const [displayName, setDisplayName] = useState<string | null>(null);
   const containerControls = useAnimationControls();
   const svgControls = useAnimationControls();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedDisplayName = localStorage.getItem("displayName");
-    if (storedDisplayName) {
-      setDisplayName(storedDisplayName);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const storedDisplayName = localStorage.getItem("displayName");
+  //   if (storedDisplayName) {
+  //     //setDisplayName(storedDisplayName);
+  //   }
+  // }, []);
 
   useEffect(() => {
     const storedUserId = localStorage.getItem("userId");
     if (storedUserId) {
-      setUserId(Number(storedUserId));
+      //setUserId(Number(storedUserId));
     }
   }, []);
 
@@ -46,18 +46,28 @@ const SideBar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userId");
-    localStorage.removeItem("displayName");
+    localStorage.removeItem("UserId");
+    //localStorage.removeItem("displayName");
     console.log("removed userId and displayname");
     navigate("/login");
     console.log("navigating to login page");
     setUserId(null);
-    setDisplayName(null);
+    // setDisplayName(null);
   };
 
   const handleDashboardClick = () => {
-    window.location.reload();
-    setIsOpen(false);
+    navigate("/dashboard");
+    setIsOpen(true);
+  };
+
+  const handleStudyGroupsClick = () => {
+    navigate("/studyGroups");
+    setIsOpen(true);
+  };
+
+  const handleProfilePageClick = () => {
+    navigate("/profilePage");
+    setIsOpen(true);
   };
 
   return (
@@ -99,15 +109,25 @@ const SideBar = () => {
         <SideBarLink
           name="Dashboard"
           isOpen={isOpen}
-          to="/home"
+          to="/dashboard"
           onClick={handleDashboardClick}
         >
           <ChartBarIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
-        <SideBarLink name="My Groups" isOpen={isOpen} to="/groups">
+        <SideBarLink
+          name="Study Groups"
+          isOpen={isOpen}
+          to="/studyGroups"
+          onClick={handleStudyGroupsClick}
+        >
           <UserGroupIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
-        <SideBarLink name="Profile" isOpen={isOpen} to="/profile">
+        <SideBarLink
+          name="Profile"
+          isOpen={isOpen}
+          to="/profilePage"
+          onClick={handleProfilePageClick}
+        >
           <UserIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
         </SideBarLink>
         <SideBarLink

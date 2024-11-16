@@ -1,40 +1,31 @@
-import React, { useRef, useState, useEffect, FormEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
+import { useLocation, useNavigate } from "react-router-dom";
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
+// interface Params {
+//   userId: string;
+// }
 
 const EmailVerificationPage: React.FC = () => {
-  const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
+  const [code, setCode] = useState<string[]>(["", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { state } = useLocation();
+  const [, setIsVerified] = useState(false);
+  const [error, setError] = useState("");
+  // const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const isLoading = false;
+  // const location = useLocation();
 
   const handleChange = (index: number, value: string) => {
     const newCode = [...code];
+    newCode[index] = value;
+    setCode(newCode);
 
-    // Handle pasted content
-    if (value.length > 1) {
-      const pastedCode = value.slice(0, 6).split("");
-      for (let i = 0; i < pastedCode.length; i++) {
-        if (i < newCode.length) {
-          newCode[i] = pastedCode[i];
-        }
-      }
-      setCode(newCode);
-
-      // Focus on the next empty input or the last filled one
-      const nextIndex =
-        newCode.findIndex((digit) => digit === "") !== -1
-          ? newCode.findIndex((digit) => digit === "")
-          : newCode.length - 1; // Focus the last input if all are filled
-      inputRefs.current[nextIndex]?.focus();
-    } else {
-      newCode[index] = value;
-      setCode(newCode);
-
-      // Move focus to the next input field if value is entered
-      if (value && index < 5) {
-        inputRefs.current[index + 1]?.focus();
-      }
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
     }
   };
 
@@ -47,37 +38,92 @@ const EmailVerificationPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    //const UserId = location.state?.UserId;
+    // console.log("UserId from cookies/localStorage", UserId);
+
+    /*const UserId =
+      location.state?.UserId ||
+      localStorage.getItem("UserId") ||
+      Cookies.get("UserId");*/
+    const UserId =
+      localStorage.getItem("UserId") || sessionStorage.getItem("UserId");
+
+    console.log("Retrieved UserId:", UserId);
+    //const UserId = Cookies.get("UserId");
+    //const UserId = 54;
     const verificationCode = code.join("");
-    console.log(`Verification code submitted: ${verificationCode}`);
-    // Add API call here
+    console.log("Verification code:", verificationCode);
+
+    if (!UserId) {
+      setError("UserId is missing");
+      setIsLoading(false);
+      return;
+    }
+
+    console.log("Sending POST request with:", {
+      UserId: UserId,
+      InputVerificationCode: verificationCode,
+    });
+
+    try {
+      const response = await fetch(`${apiUrl}api/verifyemail`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          UserId,
+          InputVerificationCode: verificationCode,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Invalid verification code");
+      }
+
+      setIsVerified(true);
+
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Verification failed");
+        setIsLoading(false);
+        // setSuccess(false);
+      } else if (state.fromForgotPassword) {
+        navigate("/reset-password", { state: { UserId: state.UserId } });
+      } else {
+        // setSuccess(true);
+        setError("");
+        localStorage.removeItem("UserId");
+        localStorage.removeItem("VerificationCode");
+        navigate("/login"); // Redirect after successful verification
+      }
+    } catch (err) {
+      setError("Wrong verification code.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Auto submit when all fields are filled
-  useEffect(() => {
-    if (code.every((digit) => digit !== "")) {
-      handleSubmit(new Event("submit") as any);
-    }
-  }, [code]);
-
   return (
-    <div className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
+    <div
+      className="min-h-screen bg-gradient-to-br 
+      from-gray-900 via-yellow-900 to-yellow-600 flex items-center
+      justify-center relative overflow-hidden"
+    >
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl p-8 w-full max-w-md"
       >
-        <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-yellow-300 to-yellow-600 text-transparent bg-clip-text">
+        <h2 className="text-3xl font-bold mb-6 text-center text-white">
           Verify Your Email
         </h2>
-        <p className="text-center text-gray-200 mb-6">
-          Enter the 6-digit code sent to your email address.
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex justify-between">
+        <form onSubmit={handleSubmit}>
+          <div className="flex justify-between mb-6">
             {code.map((digit, index) => (
               <input
                 key={index}
@@ -87,21 +133,21 @@ const EmailVerificationPage: React.FC = () => {
                 value={digit}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-green-500 focus:outline-none"
+                className="w-12 h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:outline-none"
               />
             ))}
           </div>
-
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white font-bold py-3 px-4 rounded-lg shadow-lg hover:from-yellow-600 hover:to-yellow-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 text-white font-bold py-3 px-4 rounded-lg"
             type="submit"
             disabled={isLoading || code.some((digit) => !digit)}
           >
             {isLoading ? "Verifying..." : "Verify Email"}
           </motion.button>
         </form>
+        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
       </motion.div>
     </div>
   );

@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Input from "../components/Input";
 import { User, Mail, Lock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PasswordStrengthMeter from "../components/PasswordStrength";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const SignUpPage = () => {
   const [FirstName, setFirstName] = useState("");
@@ -11,11 +13,32 @@ const SignUpPage = () => {
   const [DisplayName, setDisplayName] = useState("");
   const [Email, setEmail] = useState("");
   const [Password, setPassword] = useState("");
+  const [PasswordValid, setPasswordValid] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const validatePassword = (password: string) => {
+    const isStrongPassword =
+      password.length >= 6 && //At least 6 characters
+      /[A-Z]/.test(password) && //Contains uppercase letter
+      /[a-z]/.test(password) && //Contains lowercase letter
+      /\d/.test(password) && //Contains a number
+      /[^A-Za-z0-9]/.test(password); //Contains special character
+
+    setPasswordValid(isStrongPassword); //Update state based on password strength
+  };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+
+    //If password is not valid, prevent form submission
+    if (!PasswordValid) {
+      setError("Password must meet all strength requirements.");
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:5001/api/register", {
+      const response = await fetch(`${apiUrl}api/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,16 +53,26 @@ const SignUpPage = () => {
       });
 
       const data = await response.json();
+      console.log("UserId before sending verification request:", data.UserId);
+
       if (data.error) {
-        setError(data.error);
+        setError(data.error); //Set error message if email is already in use or any other issue
+      } else if (data.UserId) {
+        //Store UserId in localStorage
+        localStorage.setItem("UserId", data.UserId);
+        navigate("/verify-email", { state: { UserId: data.UserId } }); //Navigate to email verification page
       } else {
-        console.log("User registered successfully");
+        setError("Email is already in use!");
       }
     } catch (err) {
-      setError("An error occurred during registration.");
+      //setError("An error occurred during registration.");
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    validatePassword(Password); //Initial validation
+  }, [Password]);
 
   return (
     <div
@@ -94,6 +127,9 @@ const SignUpPage = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
             <PasswordStrengthMeter password={Password} />
+            {error && (
+              <p className="text-sm text-red-500 mt-2">{error}</p> // Ensure error is styled with red text
+            )}
             <motion.button
               type="submit"
               className="mt-5 w-full py-3 px-4 bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-700 text-white
@@ -122,6 +158,3 @@ const SignUpPage = () => {
 };
 
 export default SignUpPage;
-function setError(error: any) {
-  throw new Error("Function not implemented.");
-}

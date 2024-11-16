@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import Select from "react-select";
 import classesData from "../../../classes.json";
+import { StudyGroup } from "../types";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface CreateGroupModalProps {
   onCreateGroup: (newGroup: StudyGroup) => void;
@@ -65,7 +68,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     console.log("creating group user id: ", userId);
 
     try {
-      const response = await fetch("http://localhost:5000/api/addgroup", {
+      const response = await fetch(apiUrl + "api/addgroup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

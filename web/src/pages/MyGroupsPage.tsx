@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import StudyGroupList from "../components/shared/StudyGroupList";
 import GroupDetails from "../components/shared/GroupDetails";
+import CreateGroupModal from "../components/mygroups/CreateGroupModal";
 import FilterModal from "../components/shared/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
+import { PlusCircleIcon } from "lucide-react";
 import { StudyGroup } from "../components/types";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -14,19 +16,20 @@ interface Filters {
   maxSize: number;
 }
 
-const StudyGroupDashboard = () => {
+const MyGroups = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<number | null>(null);
   const [groups, setGroups] = useState<StudyGroup[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<StudyGroup | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({
     modalities: [],
     maxSize: 200,
   });
   const [showFilters, setShowFilters] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 
   // checking for authentication
   useEffect(() => {
@@ -39,23 +42,23 @@ const StudyGroupDashboard = () => {
     setIsLoading(false);
   }, [navigate]);
 
-  // fetching groups when userId is available
+  // fetching user's groups when userId is available
   useEffect(() => {
     if (userId) {
-      fetchGroups();
+      fetchUserGroups();
     }
   }, [userId]);
 
   const refreshGroups = async () => {
     setIsLoading(true);
-    fetchGroups();
+    fetchUserGroups();
     setIsLoading(false);
   };
 
-  const fetchGroups = async () => {
-    //setIsLoading(true);
+  const fetchUserGroups = async () => {
     setError(null);
     try {
+      // First get all groups
       const response = await fetch(`${apiUrl}api/searchgroups`, {
         method: "POST",
         headers: {
@@ -73,6 +76,7 @@ const StudyGroupDashboard = () => {
 
       const data = await response.json();
 
+      // Fetch details for each group and filter for groups where user is a member
       const groupDetails = await Promise.all(
         data.results.map(async (name: string) => {
           const groupResponse = await fetch(
@@ -90,15 +94,15 @@ const StudyGroupDashboard = () => {
           }
 
           const groupData = await groupResponse.json();
-
           return {
             id: name,
             name,
             description: groupData.description,
             class: groupData.class,
             size: groupData.size,
-            modality: groupData.modality,
+            link: groupData.link,
             owner: groupData.owner,
+            modality: groupData.modality,
             location: groupData.location,
             meetingTime: groupData.meetingTime,
             createdAt: new Date(groupData.createdAt),
@@ -108,8 +112,12 @@ const StudyGroupDashboard = () => {
         })
       );
 
-      setGroups(groupDetails);
-      console.log(groupDetails);
+      // Filter for groups where the user is a member
+      const userGroups = groupDetails.filter((group) =>
+        group.students.includes(userId || 0)
+      );
+      setGroups(userGroups);
+      console.log(userGroups);
     } catch (error) {
       console.error("Error fetching groups:", error);
       setError(
@@ -117,9 +125,13 @@ const StudyGroupDashboard = () => {
           ? error.message
           : "An error occurred while fetching groups"
       );
-    } finally {
-      //setIsLoading(false);
     }
+  };
+
+  const handleCreateGroup = (newGroup: StudyGroup) => {
+    setGroups((prev) => [...prev, newGroup]);
+    setShowCreateGroupModal(false);
+    refreshGroups(); // Refresh the groups list after creating a new group
   };
 
   // Handler for updating group data when membership changes
@@ -130,20 +142,13 @@ const StudyGroupDashboard = () => {
       )
     );
 
-    // Update selected group if it's the one being modified
     if (selectedGroup?.groupId === updatedGroup.groupId) {
       setSelectedGroup(updatedGroup);
     }
   };
 
-  const handleJoinSuccess = () => {
-    refreshGroups(); // Refresh groups to get updated data
-    console.log("successfully joined group");
-  };
-
   const handleLeaveSuccess = () => {
-    refreshGroups(); // Refresh groups to get updated data
-    console.log("successfully left group");
+    refreshGroups();
   };
 
   const handleModalityChange = (modality: string) => {
@@ -189,9 +194,16 @@ const StudyGroupDashboard = () => {
 
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
-              Find Study Groups
+              My Study Groups
             </h1>
             <div className="flex gap-2">
+              <button
+                className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
+                onClick={() => setShowCreateGroupModal(true)}
+              >
+                <PlusCircleIcon className="h-6 w-6" />
+                Create Group
+              </button>
               <button
                 className="flex items-center gap-2 bg-black text-yellow-400 hover:bg-black/80 px-4 py-2 rounded"
                 onClick={() => setShowFilters(!showFilters)}
@@ -211,6 +223,14 @@ const StudyGroupDashboard = () => {
             />
           )}
 
+          {showCreateGroupModal && (
+            <CreateGroupModal
+              onCreateGroup={handleCreateGroup}
+              setShowCreateGroupModal={setShowCreateGroupModal}
+              userId={userId || 0}
+            />
+          )}
+
           <div className="relative flex flex-col items-center">
             <div className="mb-4 w-full">
               <div className="relative">
@@ -224,28 +244,34 @@ const StudyGroupDashboard = () => {
                 <FaSearch className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 text-lg" />
               </div>
             </div>
-
-            <div className="flex space-x-4 w-full h-[calc(100vh-200px)] bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
-              {/* Make the group list scrollable */}
-              <div className="w-full overflow-auto hide-scrollbar">
-                <StudyGroupList
-                  groups={filteredGroups}
-                  selectedGroup={selectedGroup}
-                  setSelectedGroup={setSelectedGroup}
-                  userId={userId || 0}
-                />
-              </div>
-
-              {/* Keep the group details static */}
-              {selectedGroup && (
-                <GroupDetails
-                  group={selectedGroup}
-                  UserId={userId || 0}
-                  context="dashboard"
-                  onGroupUpdate={handleGroupUpdate}
-                  onJoinSuccess={handleJoinSuccess}
-                  onLeaveSuccess={handleLeaveSuccess}
-                />
+            <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
+              {groups.length === 0 ? (
+                <div className="w-full flex items-center justify-center text-white text-lg">
+                  You haven't joined any study groups yet.
+                </div>
+              ) : (
+                <>
+                  <div className="w-full overflow-auto hide-scrollbar">
+                    <StudyGroupList
+                      groups={filteredGroups}
+                      selectedGroup={selectedGroup}
+                      setSelectedGroup={setSelectedGroup}
+                      userId={userId || 0}
+                      onKickSuccess={refreshGroups}
+                      context="mygroups"
+                    />
+                  </div>
+                  {selectedGroup && (
+                    <GroupDetails
+                      group={selectedGroup}
+                      UserId={userId || 0}
+                      context="mygroups"
+                      onGroupUpdate={handleGroupUpdate}
+                      onJoinSuccess={() => {}}
+                      onLeaveSuccess={handleLeaveSuccess}
+                    />
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -255,4 +281,4 @@ const StudyGroupDashboard = () => {
   );
 };
 
-export default StudyGroupDashboard;
+export default MyGroups;
