@@ -221,6 +221,9 @@ app.post('/api/changepassword', async (req, res, next) => {
   const { UserId, Password } = req.body;
 
   const db = client.db('PeerGroupFinder');
+
+  console.log("UserId:", UserId);
+  console.log("Password:", Password);
   
   try {
     const user = await db.collection('Users').findOne({ UserId: UserId });

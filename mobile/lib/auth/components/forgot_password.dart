@@ -137,7 +137,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        if (responseData['error'] == '') {
+        if (responseData['error'] == null || responseData['error'] == '') {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Password reset successful. Please login.')),
           );
@@ -149,7 +149,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server error. Please try again later.')),
+          const SnackBar(content: Text('Password is the same as the current password.')),
         );
       }
     } catch (e) {
