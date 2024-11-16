@@ -173,6 +173,8 @@ class DashboardPageState extends State<DashboardPage> {
             _applyFilters();
           });
         },
+        initialModalities: selectedFilters['modalities'] ?? [],
+        initialMaxSize: selectedFilters['maxSize'] ?? 200,
       ),
     );
   }

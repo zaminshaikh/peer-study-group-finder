@@ -1,32 +1,50 @@
 // lib/widgets/filter_modal_sheet.dart
+
 import 'package:flutter/material.dart';
 
 class FilterModalSheet extends StatefulWidget {
   final Function(Map<String, dynamic>) onApplyFilters;
+  final List<String> initialModalities;
+  final int initialMaxSize;
 
-  const FilterModalSheet({Key? key, required this.onApplyFilters}) : super(key: key);
+  const FilterModalSheet({
+    Key? key,
+    required this.onApplyFilters,
+    required this.initialModalities,
+    required this.initialMaxSize,
+  }) : super(key: key);
 
   @override
   _FilterModalSheetState createState() => _FilterModalSheetState();
 }
 
 class _FilterModalSheetState extends State<FilterModalSheet> {
-  List<String> selectedModalities = [];
-  double maxSize = 200;
+  late List<String> selectedModalities;
+  late double maxSize;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedModalities = List<String>.from(widget.initialModalities);
+    maxSize = widget.initialMaxSize.toDouble();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Wrap(
       children: [
         ListTile(
-          title: const Text('Filter Options', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          title: const Text(
+            'Filter Options',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
         ),
         CheckboxListTile(
-          title: const Text('In-Person'),
-          value: selectedModalities.contains('In-Person'),
+          title: const Text('In Person'),
+          value: selectedModalities.contains('In Person'),
           onChanged: (bool? value) {
             setState(() {
-              _onModalityChanged('In-Person', value);
+              _onModalityChanged('In Person', value);
             });
           },
         ),
@@ -83,11 +101,13 @@ class _FilterModalSheetState extends State<FilterModalSheet> {
 
   void _onModalityChanged(String modality, bool? isSelected) {
     if (isSelected != null) {
-      if (isSelected) {
-        selectedModalities.add(modality);
-      } else {
-        selectedModalities.remove(modality);
-      }
+      setState(() {
+        if (isSelected) {
+          selectedModalities.add(modality);
+        } else {
+          selectedModalities.remove(modality);
+        }
+      });
     }
   }
 }
