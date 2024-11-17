@@ -30,29 +30,37 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [error] = useState("");
+  const [error, setError] = useState("");
   const userId = parseInt(localStorage.getItem("UserId") || "0", 10);
   console.log("userId before sending request:", userId);
+
+  const isPasswordStrong =
+    password.length >= 6 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /\d/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
+    if (!isPasswordStrong) {
+      setError(
+        "Password must fulfill all requirements to reset your password."
+      );
+      return;
+    }
+
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
 
     try {
       await resetPassword(userId, password);
-
-      toast.success(
-        "Password reset successfully, redirecting to login page..."
-      );
+      setError("");
       localStorage.removeItem("UserId");
 
-      /*setTimeout(() => {
-        navigate("/login");
-      }, 2000);*/
       setTimeout(() => {
         if (state?.fromForgotPassword) {
           // If coming from forgot password flow, go to login
@@ -64,7 +72,7 @@ const ResetPasswordPage = () => {
       }, 2000);
     } catch (error) {
       console.error(error);
-      toast.error((error as Error).message || "Error resetting password");
+      setError("Error resetting password. Please try again.");
     }
   };
 
@@ -84,9 +92,6 @@ const ResetPasswordPage = () => {
           <h2 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-yellow-300 to-yellow-700  text-transparent bg-clip-text">
             Reset Password
           </h2>
-          {/*error && <p className="text-red-500 text-sm mb-4">{error}</p>*/}
-          {/*message && <p className="text-green-500 text-sm mb-4">{message}</p>*/}
-
           <form onSubmit={handleSubmit}>
             <Input
               Icon={Lock}
@@ -107,9 +112,19 @@ const ResetPasswordPage = () => {
             />
             {/* Password Strength Meter */}
             <PasswordStrengthMeter password={password} />
-            {error && (
-              <p className="text-sm text-red-500 mt-2">{error}</p> // Ensure error is styled with red text
+
+            {password && confirmPassword && password !== confirmPassword && (
+              <p className="text-sm text-red-500 mt-2">
+                Passwords do not match
+              </p>
             )}
+
+            {password && !isPasswordStrong && (
+              <p className="text-sm text-red-500 mt-2">
+                Password must fulfill all requirements
+              </p>
+            )}
+
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
