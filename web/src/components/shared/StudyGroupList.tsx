@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Crown, UserX, Users } from "lucide-react";
 import { StudyGroup } from "../types";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface StudyGroupListProps {
   groups: StudyGroup[];
   selectedGroup: StudyGroup | null;
@@ -30,7 +32,7 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
 
   const handleKickStudent = async (groupId: number, studentId: number) => {
     try {
-      const response = await fetch("http://localhost:5000/api/kickstudent", {
+      const response = await fetch(`${apiUrl}api/kickstudent`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
