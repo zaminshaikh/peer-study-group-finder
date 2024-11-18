@@ -35,6 +35,11 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
   const isOwner = group.owner === UserId;
 
   useEffect(() => {
+    setEditedGroup(group);
+    setSelectedClass(group.class); // Reset the selected class as well
+  }, [group]);
+
+  useEffect(() => {
     if (Array.isArray(group.students)) {
       setIsMember(group.students.includes(UserId));
     } else {
