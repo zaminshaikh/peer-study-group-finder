@@ -47,7 +47,7 @@ const SideBar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("userId");
+    localStorage.removeItem("UserId");
     localStorage.removeItem("username");
     console.log("removed userId and username");
     navigate("/login");
