@@ -9,7 +9,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {

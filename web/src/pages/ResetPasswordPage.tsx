@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import Input from "../components/Input";
 import { Lock } from "lucide-react";
-import toast from "react-hot-toast";
 import PasswordStrengthMeter from "../components/PasswordStrength";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -30,7 +29,7 @@ const ResetPasswordPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { state } = useLocation();
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const userId = parseInt(localStorage.getItem("UserId") || "0", 10);
   console.log("userId before sending request:", userId);
 
