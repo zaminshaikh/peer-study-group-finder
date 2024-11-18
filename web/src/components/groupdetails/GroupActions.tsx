@@ -154,7 +154,7 @@ const GroupActions: React.FC<GroupActionsProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Head over to Dashboard to Modify
+          See Group Info
         </motion.button>
       )}
     </div>

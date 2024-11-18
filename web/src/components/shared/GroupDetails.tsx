@@ -214,8 +214,8 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
 
   // const showButton =
   //   context === "dashboard" || (context === "mygroups" && isMember);
-  const showLinks = context === "mygroups" && isMember;
-  const showRefLinks = context === "dashboard" && isMember;
+  const showLinks = context === "mygroups" && isMember && !isOwner;
+  const showRefLinks = context === "dashboard" && isMember && !isOwner;
   const showEditDelete = context === "mygroups" && isOwner;
 
   return (
