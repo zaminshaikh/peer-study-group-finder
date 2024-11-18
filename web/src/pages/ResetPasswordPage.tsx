@@ -131,6 +131,7 @@ const ResetPasswordPage = () => {
               type="submit"
               //disabled={isLoading}
             >
+              Submit
               {/*isLoading ? "Resetting..." : "Set New Password"*/}
             </motion.button>
           </form>

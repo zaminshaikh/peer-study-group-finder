@@ -9,7 +9,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [, setError] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -78,12 +78,16 @@ const ForgotPasswordPage = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              {error && (
+                <p className="text-sm text-red-500 mb-2">{error}</p> // Ensure error is styled with red text
+              )}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3 px-4 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold rounded-lg shadow-lg hover:from-yellow-600 hover:to-yellow-700 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:ring-offset-gray-900 transition duration-200"
                 type="submit"
               >
+                Submit
                 {/*isLoading ? (
                 <Loader className="size-6 animate-spin mx-auto" />
               ) : (
