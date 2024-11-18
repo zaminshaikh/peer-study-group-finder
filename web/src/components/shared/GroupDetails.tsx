@@ -35,8 +35,9 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
   const isOwner = group.owner === UserId;
 
   useEffect(() => {
+    setIsEditing(false);
     setEditedGroup(group);
-    setSelectedClass(group.class); // Reset the selected class as well
+    setSelectedClass(group.class);
   }, [group]);
 
   useEffect(() => {
@@ -409,17 +410,26 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
             <div>
               <p className="text-sm text-gray-400">Size</p>
               {isEditing ? (
-                <input
-                  type="number"
-                  value={editedGroup.size}
-                  onChange={(e) =>
-                    setEditedGroup({
-                      ...editedGroup,
-                      size: parseInt(e.target.value),
-                    })
-                  }
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg w-full border border-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                />
+                <div className="flex items-center">
+                  <input
+                    type="range"
+                    min="2"
+                    max="200"
+                    value={editedGroup.size}
+                    onChange={(e) => {
+                      const newSize = Math.min(
+                        Math.max(2, parseInt(e.target.value)),
+                        200
+                      );
+                      setEditedGroup({
+                        ...editedGroup,
+                        size: newSize,
+                      });
+                    }}
+                    className="bg-gray-700 h-2 rounded-lg w-full mx-2"
+                  />
+                  <span className="text-white">{editedGroup.size}</span>
+                </div>
               ) : (
                 <p className="font-medium">{group.size} members</p>
               )}
@@ -446,7 +456,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
             <button
               onClick={() => {
                 setIsEditing(false);
-                setEditedGroup(group); // Reset to original group details
+                setEditedGroup(group);
               }}
               className="bg-red-600 hover:bg-red-700 transition-transform duration-200 transform hover:scale-105 text-white font-bold py-2 px-4 rounded-lg"
             >
