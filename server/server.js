@@ -143,6 +143,18 @@ app.post('/api/register', async (req, res, next) =>
   {
     result = await db.collection('Users').insertOne(newUser);
     user = await db.collection("Users").findOne({ _id : result.insertedId} );
+    
+    // DB might take too long to add UserId, so retry at most 10 times (with 100 ms timeouts) to give the DB time to add UserId.
+    for (let i = 0; i < 10; i++) {
+      if (user.UserId) {
+        console.log(`UserId found at ${i}.`);
+        break;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+      user = await db.collection("Users").findOne({ _id : result.insertedId});
+    }
+
   }
   catch(e)
   {
