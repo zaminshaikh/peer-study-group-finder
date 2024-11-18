@@ -7,6 +7,8 @@ import Select from "react-select";
 import classesData from "../../../classes.json";
 import { StudyGroup } from "../types";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface GroupDetailsProps {
   group: StudyGroup;
   UserId: number;
@@ -60,7 +62,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/editgroup", {
+      const response = await fetch(`${apiUrl}api/editgroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -104,7 +106,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/deletegroup", {
+      const response = await fetch(`${apiUrl}api/deletegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -136,7 +138,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/joingroup", {
+      const response = await fetch(`${apiUrl}api/joingroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -180,7 +182,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/leavegroup", {
+      const response = await fetch(`${apiUrl}api/leavegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
