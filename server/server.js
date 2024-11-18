@@ -27,13 +27,42 @@ async function sendEmail(msg){
     })
 }
 
-async function insertNewVerification(db, user, verificationCode, subject, text){
-  const msg = {
+// async function insertNewVerification(db, user, verificationCode, subject, text){
+//   const msg = {
+//     to: user.Email, // Change to your recipient
+//     from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+//     subject: subject,
+//     text: text,
+//   }
+//   console.log("2");
+//   sendEmail(msg);
+
+//   const response = await db.collection('Users').updateOne(
+//     {UserId: user.UserId},
+//     {$set: {VerificationCode: verificationCode}}
+//   );
+// }
+
+async function insertNewVerification(db, user, verificationCode, emailType){
+
+  // Add the repeated parts of the message.
+  let msg = {
     to: user.Email, // Change to your recipient
     from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-    subject: subject,
-    text: text,
+    dynamicTemplateData: {
+      FirstName: user.FirstName,
+      VerificationCode: verificationCode
+    }
+  };
+
+  // Conditionally choose which email template to send.
+  if (emailType === 'emailVerification') {
+    msg.templateId = 'd-ca82e12c51184afabcfc761f9a1353f0';
   }
+  else if (emailType === 'forgotPassword') {
+    msg.templateId = 'd-66c84a90f3c64061adca5fe3683f66a9';
+  }
+
   console.log("2");
   sendEmail(msg);
 
@@ -114,6 +143,18 @@ app.post('/api/register', async (req, res, next) =>
   {
     result = await db.collection('Users').insertOne(newUser);
     user = await db.collection("Users").findOne({ _id : result.insertedId} );
+    
+    // DB might take too long to add UserId, so retry at most 10 times (with 100 ms timeouts) to give the DB time to add UserId.
+    for (let i = 0; i < 10; i++) {
+      if (user.UserId) {
+        console.log(`UserId found at ${i}.`);
+        break;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 100));
+      user = await db.collection("Users").findOne({ _id : result.insertedId});
+    }
+
   }
   catch(e)
   {
@@ -122,14 +163,16 @@ app.post('/api/register', async (req, res, next) =>
     return;
   }
 
-  const msg = {
-    to: Email, // Change to your recipient
-    from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-    subject: 'PeerStudyGroupFinder: Email Verification',
-    text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
-  }
+  // const msg = {
+  //   to: Email, // Change to your recipient
+  //   from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+  //   subject: 'PeerStudyGroupFinder: Email Verification',
+  //   text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
+  // }
   
-  sendEmail(msg);
+  // sendEmail(msg);
+
+  insertNewVerification(db, user, verificationCode, 'emailVerification');
 
   var ret = { UserId: user.UserId, error: error };
   res.status(200).json(ret);
@@ -179,9 +222,9 @@ app.post('/api/resendverificationemail', async (req, res, next) => {
 
   try {
     const result = await db.collection('Users').findOne({UserId:UserId});
-    const subject = 'PeerStudyGroupFinder: Resend Email Verification';
-    const text = `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`;
-    insertNewVerification(db, result, verificationCode, subject, text);
+    // const subject = 'PeerStudyGroupFinder: Resend Email Verification';
+    // const text = `Here is your new verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, 'emailVerification');
     res.status(200).json({error:error});
   }
   catch (e) {
@@ -206,9 +249,9 @@ app.post('/api/forgotpasswordverification', async (req, res, next) => {
       return;
     }
     ;
-    const subject = 'PeerStudyGroupFinder: Forgot Password Verification'
-    const text = `Here is your verification code to change your password: ${verificationCode}\n\nPlease do not share this code with anyone.`;
-    insertNewVerification(db, result, verificationCode, subject, text);
+    // const subject = 'PeerStudyGroupFinder: Forgot Password Verification'
+    // const text = `Here is your verification code to change your password: ${verificationCode}\n\nPlease do not share this code with anyone.`;
+    insertNewVerification(db, result, verificationCode, "forgotPassword");
     res.status(200).json({UserId: result.UserId, error:error});
   }
   catch (e) {
