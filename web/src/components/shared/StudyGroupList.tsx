@@ -8,7 +8,7 @@ interface StudyGroupListProps {
   setSelectedGroup: (group: StudyGroup | null) => void;
   userId: number;
   onKickSuccess?: () => void;
-  context?: "mygroups" | "search"; // Add context prop
+  context?: "mygroups" | "search";
 }
 
 const StudyGroupList: React.FC<StudyGroupListProps> = ({
@@ -17,7 +17,7 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
   setSelectedGroup,
   userId,
   onKickSuccess,
-  context = "search", // Default to search context
+  context = "search",
 }) => {
   const [showKickConfirm, setShowKickConfirm] = useState<{
     groupId: number | null;
@@ -120,38 +120,40 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
           </div>
 
           {expandedGroupMembers === group.groupId &&
-            canManageMembers(group) &&
-            group.students &&
-            group.students.length > 0 && (
+            canManageMembers(group) && (
               <div className="mt-4">
                 <h4 className="font-medium text-gray-700 mb-2">
                   Current Members:
                 </h4>
-                <div className="space-y-2">
-                  {group.students.map(
-                    (studentId) =>
-                      studentId !== userId && (
-                        <div
-                          key={studentId}
-                          className="flex items-center justify-between bg-gray-50 p-2 rounded"
-                        >
-                          <span>Student #{studentId}</span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowKickConfirm({
-                                groupId: group.groupId!,
-                                studentId: studentId,
-                              });
-                            }}
-                            className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                {!group.students || group.students.length === 1 ? (
+                  <p className="text-black">All By Myself😭</p>
+                ) : (
+                  <div className="space-y-2">
+                    {group.students.map(
+                      (studentId) =>
+                        studentId !== userId && (
+                          <div
+                            key={studentId}
+                            className="flex items-center justify-between bg-gray-50 p-2 rounded"
                           >
-                            <UserX className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )
-                  )}
-                </div>
+                            <span>Student #{studentId}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowKickConfirm({
+                                  groupId: group.groupId!,
+                                  studentId: studentId,
+                                });
+                              }}
+                              className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                            >
+                              <UserX className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
