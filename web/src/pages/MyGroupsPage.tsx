@@ -59,7 +59,7 @@ const MyGroups = () => {
     setError(null);
     try {
       // First get all groups
-      const response = await fetch(`${apiUrl}api/searchgroups`, {
+      const response = await fetch(`http://localhost:5000/api/searchgroups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,9 @@ const MyGroups = () => {
       const groupDetails = await Promise.all(
         data.results.map(async (name: string) => {
           const groupResponse = await fetch(
-            `${apiUrl}api/getgroupdetails?name=${encodeURIComponent(name)}`,
+            `http://localhost:5000/api/getgroupdetails?name=${encodeURIComponent(
+              name
+            )}`,
             {
               method: "GET",
               headers: {
@@ -246,8 +248,17 @@ const MyGroups = () => {
             </div>
             <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
               {groups.length === 0 ? (
-                <div className="w-full flex items-center justify-center text-white text-lg">
-                  You haven't joined any study groups yet.
+                <div className="w-full flex flex-col items-center justify-center text-white text-lg text-center">
+                  <span>You haven't joined any study groups yet.</span>
+                  <div className="flex items-center gap-2">
+                    <span>Click on the honeybee to find study groups!</span>
+                    <a
+                      href="/studyGroups"
+                      className="text-4xl hover:scale-110 transition-all duration-200"
+                    >
+                      🐝
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <>

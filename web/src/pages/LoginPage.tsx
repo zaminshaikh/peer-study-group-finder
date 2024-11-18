@@ -35,6 +35,8 @@ const LoginPage = () => {
       // Handle successful registration (e.g., redirect to login or show success message)
       //localStorage.setItem("displayName", data.displayName);
       localStorage.setItem("UserId", data.UserId.toString());
+      localStorage.setItem("username", data.DisplayName);
+      console.log("Logged in username:", data.DisplayName);
       console.log("Login successful:");
       navigate("/dashboard");
     }

@@ -31,7 +31,11 @@ const SignUpPage = () => {
     e.preventDefault();
     setError("");
 
-    console.log("Email being sent for registration:", Email);
+    if (!FirstName || !LastName || !DisplayName || !Email || !Password) {
+      setError("Must populate all fields");
+      return;
+    }
+
     //If password is not valid, prevent form submission
     if (!PasswordValid) {
       setError("Password must meet all strength requirements.");
