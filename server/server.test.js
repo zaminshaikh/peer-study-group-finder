@@ -36,13 +36,14 @@ describe('POST /api/addgroup', () => {
         
         const testGroup = {
             Class: 'JestTestClass',
-            name: 'Test Group',
-            owner: 1,
-            expiry: '2024-12-31',
-            link: 'https://example.com',
-            modality: 'Online',
-            description: 'A Jest test group',
-            students: []
+            Name: 'Test Group',
+            Owner: 1,
+            Link: 'https://example.com',
+            Modality: 'Online',
+            Description: 'A Jest test group',
+            Size: 100,
+            Location: "Discord",
+            MeetingTime: "10:30"
         };
 
         const response = await request(app).post('/api/addgroup').send(testGroup);
@@ -52,11 +53,11 @@ describe('POST /api/addgroup', () => {
 });
 
 describe('POST /api/joingroup', () => {
-    it("should put the user's id in the group's student array and put the group's name in the user's group's array", async () => {
+    it("should put the user's id in the group's student array and put the group's id in the user's group array", async () => {
 
         const testJoinGroup = {
-            userId: 1,
-            name: 'Test Group'
+            UserId: 1,
+            GroupId: 26
         };
 
         const response = await request(app).post('/api/joingroup').send(testJoinGroup);
@@ -69,8 +70,8 @@ describe('POST /api/searchgroups', () => {
     it("should search for groups with the given class code", async () => {
 
         const testSearch = {
-            userId: 1,
-            search: 'JestTestClass'
+            UserId: 1,
+            Search: 'JestTestClass'
         };
 
         const response = await request(app).post('/api/searchgroups').send(testSearch);
@@ -82,7 +83,7 @@ describe('POST /api/searchgroups', () => {
 });
 
 describe('POST /api/register', () => {
-    it("should add a user to the user's database", async () => {
+    it("should add a user to the users database", async () => {
 
         const testRegister = {
             FirstName: "JestFN",
@@ -99,7 +100,7 @@ describe('POST /api/register', () => {
 });
 
 describe('POST /api/login', () => {
-    it("should log the user in", async () => {
+    it("should log the user in if user exists in users database", async () => {
 
         const testLogin = {
             Email: 'JestTest@email.com',
@@ -109,7 +110,7 @@ describe('POST /api/login', () => {
         const response = await request(app).post('/api/login').send(testLogin);
         console.log(response.body);
         expect(response.status).toBe(200);
-        expect(response.body.id).not.toBe(-1);
+        expect(response.body.UserId).not.toBe(-1);
 
     });
 });
