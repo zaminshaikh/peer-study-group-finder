@@ -91,7 +91,7 @@ const LandingPage = () => {
               alt="StudyHive Logo"
               className="w-12 h-12"
             />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-800 bg-clip-text text-transparent">
               StudyHive
             </h1>
           </div>
@@ -122,7 +122,7 @@ const LandingPage = () => {
             </button>
             <button
               onClick={handleSignupClick}
-              className="px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-900 text-gray-200 rounded-lg hover:opacity-90 transition-opacity"
+              className="px-4 py-2 bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-800 text-gray-200 rounded-lg hover:opacity-90 transition-opacity"
             >
               Sign Up
             </button>
@@ -139,7 +139,7 @@ const LandingPage = () => {
               <div className="flex flex-col md:flex-row items-center justify-center gap-2">
                 {/* Centered content */}
                 <div className="flex-1 text-center">
-                  <h1 className="text-7xl font-bold bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 bg-clip-text text-transparent mb-6">
+                  <h1 className="text-7xl font-bold bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-800 bg-clip-text text-transparent mb-6">
                     Elevate Your Study Experience
                   </h1>
                   <div className="flex-1 flex justify-center items-center relative">
@@ -160,7 +160,7 @@ const LandingPage = () => {
                   </p>
                   <button
                     onClick={handleSignupClick}
-                    className="px-8 py-3 bg-gradient-to-r from-yellow-600 to-yellow-900 text-white rounded-lg hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out text-lg font-medium"
+                    className="px-8 py-3 bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-800 text-white rounded-lg hover:scale-105 hover:shadow-lg transition-transform duration-300 ease-in-out text-lg font-medium"
                   >
                     Start Learning Together
                   </button>
