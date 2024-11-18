@@ -87,53 +87,69 @@ app.post('/api/login', async (req, res, next) =>
 // Registers a user.
 // Also, creates a verification code and adds it as a field to the user, then sends the verification code to the user's email.
 app.post('/api/register', async (req, res, next) =>
-{ 
-  const { FirstName, LastName, DisplayName, Email, Password } = req.body;
-
-  const emptyArray = [];
-  var error = '';
-
-  const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Email:Email}).toArray();
-
-  var isEmailInUse = results.length > 0;
-  if(isEmailInUse){
-    error = "Email is already in use";
-    var ret = { UserId: -1, error: error };
-    res.status(200).json(ret);
-    return;
-  }
-
-  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
-
-  const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
-
-  var result;
-  var user;
-  try
-  {
-    result = await db.collection('Users').insertOne(newUser);
-    user = await db.collection("Users").findOne({ _id : result.insertedId} );
-  }
-  catch(e)
-  {
-    error = e.toString();
-    res.status(600).json({error:error});
-    return;
-  }
-
-  const msg = {
-    to: Email, // Change to your recipient
-    from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-    subject: 'PeerStudyGroupFinder: Email Verification',
-    text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
-  }
+  { 
+    const { FirstName, LastName, DisplayName, Email, Password } = req.body;
   
-  sendEmail(msg);
+    const emptyArray = [];
+    var error = '';
+  
+    const db = client.db('PeerGroupFinder');
+    const results = await db.collection('Users').find({Email:Email}).toArray();
+  
+    var isEmailInUse = results.length > 0;
+    if(isEmailInUse){
+      error = "Email is already in use";
+      var ret = { UserId: -1, error: error };
+      res.status(200).json(ret);
+      return;
+    }
+  
+    const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+  
+    const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
+  
+    var result;
+    var user;
+    try
+    {
+      result = await db.collection('Users').insertOne(newUser);
+      user = await db.collection("Users").findOne({ _id : result.insertedId} );
+      
+      // DB might take too long to add UserId, so retry at most 10 times (with 100 ms timeouts) to give the DB time to add UserId.
+      for (let i = 0; i < 10; i++) {
+        if (user.UserId) {
+          console.log(`UserId found at ${i}.`);
+          break;
+        }
+  
+        await new Promise(resolve => setTimeout(resolve, 100));
+        user = await db.collection("Users").findOne({ _id : result.insertedId});
+      }
+  
+    }
+    catch(e)
+    {
+      error = e.toString();
+      res.status(600).json({error:error});
+      return;
+    }
+  
+    // const msg = {
+    //   to: Email, // Change to your recipient
+    //   from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+    //   subject: 'PeerStudyGroupFinder: Email Verification',
+    //   text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
+    // }
+    
+    // sendEmail(msg);
+  
+    insertNewVerification(db, user, verificationCode, 'emailVerification');
+  
+    var ret = { UserId: user.UserId, error: error };
+    res.status(200).json(ret);
+  });
+  
 
-  var ret = { UserId: user.UserId, error: error };
-  res.status(200).json(ret);
-});
 
 // Verifies that the user input the correct verification code.
 app.post('/api/verifyemail', async (req, res, next) => {
