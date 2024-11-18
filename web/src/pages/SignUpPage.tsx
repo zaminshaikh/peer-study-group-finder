@@ -41,6 +41,7 @@ const SignUpPage = () => {
       setError("Password must meet all strength requirements.");
       return;
     }
+    //const response = await fetch(`${apiUrl}api/register`,
 
     try {
       const response = await fetch(`${apiUrl}api/register`, {
@@ -64,10 +65,13 @@ const SignUpPage = () => {
         setError(data.error); //Set error message if email is already in use or any other issue
       } else if (data.UserId) {
         //Store UserId in localStorage
+        console.log("userid::", data.UserId);
         localStorage.setItem("UserId", data.UserId);
         navigate("/verify-email", { state: { UserId: data.UserId } }); //Navigate to email verification page
       } else {
-        setError("Email is already in use!");
+        // setError("Email is already in use!");
+        console.log("userid::", data.UserId);
+        setError("An unexpected error occurred.");
       }
     } catch (err) {
       //setError("An error occurred during registration.");
