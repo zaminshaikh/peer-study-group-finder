@@ -7,6 +7,8 @@ import FilterModal from "../components/shared/FilterModal";
 import { FaFilter, FaSearch } from "react-icons/fa";
 import { StudyGroup } from "../components/types";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface Filters {
   modalities: string[];
   maxSize: number;
@@ -74,9 +76,7 @@ const StudyGroupDashboard = () => {
       const groupDetails = await Promise.all(
         data.results.map(async (name: string) => {
           const groupResponse = await fetch(
-            `${apiUrl}api/getgroupdetails?name=${encodeURIComponent(
-              name
-            )}`,
+            `${apiUrl}api/getgroupdetails?name=${encodeURIComponent(name)}`,
             {
               method: "GET",
               headers: {

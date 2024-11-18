@@ -1,5 +1,6 @@
 //import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import FloatingShape from "./components/FloatingShape";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
@@ -13,6 +14,29 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 const App = () => {
   return (
     <>
+      <div className="overflow-hidden">
+        <FloatingShape
+          color="bg-yellow-500"
+          size="w-64 h-64"
+          top="10%"
+          left="20%"
+          delay={0}
+        />
+        <FloatingShape
+          color="bg-yellow-500"
+          size="w-48 h-48"
+          top="50%"
+          left="70%"
+          delay={2}
+        />
+        <FloatingShape
+          color="bg-yellow-500"
+          size="w-32 h-32"
+          top="80%"
+          left="10%"
+          delay={4}
+        />
+      </div>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />

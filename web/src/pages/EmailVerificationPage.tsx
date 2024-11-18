@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -12,6 +12,8 @@ const EmailVerificationPage: React.FC = () => {
   const [code, setCode] = useState<string[]>(["", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { state } = useLocation();
+  const [, setIsVerified] = useState(false);
   const [error, setError] = useState("");
   // const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
@@ -79,9 +81,18 @@ const EmailVerificationPage: React.FC = () => {
       });
 
       if (!response.ok) {
+        throw new Error("Invalid verification code");
+      }
+
+      setIsVerified(true);
+
+      if (!response.ok) {
         const data = await response.json();
         setError(data.error || "Verification failed");
+        setIsLoading(false);
         // setSuccess(false);
+      } else if (state.fromForgotPassword) {
+        navigate("/reset-password", { state: { UserId: state.UserId } });
       } else {
         // setSuccess(true);
         setError("");
@@ -90,8 +101,10 @@ const EmailVerificationPage: React.FC = () => {
         navigate("/login"); // Redirect after successful verification
       }
     } catch (err) {
-      setError("An error occurred while verifying the email.");
+      setError("Wrong verification code.");
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
