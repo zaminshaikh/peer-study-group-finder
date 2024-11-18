@@ -248,17 +248,17 @@ const MyGroups = () => {
             </div>
             <div className="flex space-x-4 w-full h-[calc(100vh-200px)] overflow-auto bg-gradient-to-t from-amber-400 to-amber-800 rounded-lg shadow-lg p-6">
               {groups.length === 0 ? (
-                <div className="w-full flex items-center justify-center text-white text-lg">
-                  <p>You haven't joined any study groups yet.</p>
-                  <p>
-                    {" "}
+                <div className="w-full flex flex-col items-center justify-center text-white text-lg text-center">
+                  <span>You haven't joined any study groups yet.</span>
+                  <div className="flex items-center gap-2">
+                    <span>Click on the honeybee to find study groups!</span>
                     <a
-                      href="/studyGroups" // Link to MyGroups page
-                      className="text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                      href="/studyGroups"
+                      className="text-4xl hover:scale-110 transition-all duration-200"
                     >
-                      Find Study Groups
+                      🐝
                     </a>
-                  </p>
+                  </div>
                 </div>
               ) : (
                 <>
