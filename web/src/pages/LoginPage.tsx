@@ -83,7 +83,7 @@ const LoginPage = () => {
               </Link>
             </div>
             {error && (
-              <p className="text-sm text-red-500 mt-[-12px]">{error}</p> // Display error message in red
+              <p className="text-sm mb-2 text-red-500 mt-[-12px]">{error}</p> // Display error message in red
             )}
             <motion.button
               whileHover={{ scale: 1.02 }}
