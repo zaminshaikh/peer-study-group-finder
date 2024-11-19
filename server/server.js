@@ -290,41 +290,115 @@ app.post('/api/changepassword', async (req, res, next) => {
 });
 
 
-// Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
-app.post('/api/addgroup', async (req, res, next) =>
-{
-  // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
-  // outgoing: error
+// // Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
+// app.post('/api/addgroup', async (req, res, next) =>
+// {
+//   // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
+//   // outgoing: error
 	
-  const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
+//   const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
 
-  const Students = [Owner];
-  const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:Students, Size:Size, Location:Location, MeetingTime:MeetingTime};
-  var error = '';
+//   const Students = [Owner];
+//   const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:Students, Size:Size, Location:Location, MeetingTime:MeetingTime};
+//   var error = '';
 
-  try
+//   try
+//   {
+//     const db = client.db('PeerGroupFinder');
+//     const result = await db.collection('Groups').insertOne(newGroup);
+
+//     const group = await db.collection('Groups').findOne({_id: result.insertedId});
+//     const GroupId = group.GroupId;
+
+//     const result2 = await db.collection('Users').updateOne(
+//       {UserId:Owner},
+//       {$addToSet: {OwnerOfGroup:GroupId, Group:GroupId}}
+//     );
+
+//   }
+//   catch(e)
+//   {
+//     error = e.toString();
+//   }
+
+//   var ret = { error: error };
+//   res.status(200).json(ret);
+// });
+
+
+app.post('/api/addgroup', async (req, res, next) =>
   {
-    const db = client.db('PeerGroupFinder');
-    const result = await db.collection('Groups').insertOne(newGroup);
-
-    const group = await db.collection('Groups').findOne({_id: result.insertedId});
-    const GroupId = group.GroupId;
-
-    const result2 = await db.collection('Users').updateOne(
-      {UserId:Owner},
-      {$addToSet: {OwnerOfGroup:GroupId, Group:GroupId}}
-    );
-
-  }
-  catch(e)
-  {
-    error = e.toString();
-  }
-
-  var ret = { error: error };
-  res.status(200).json(ret);
-});
-
+    // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
+    // outgoing: error
+    
+    const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
+  
+    const Students = [Owner];
+    const newGroup = {
+      Class: Class, 
+      Name: Name, 
+      Owner: Owner, 
+      Link: Link, 
+      Modality: Modality, 
+      Description: Description, 
+      Students: Students, 
+      Size: Size, 
+      Location: Location, 
+      MeetingTime: MeetingTime
+    };
+    var error = '';
+  
+    try
+    {
+      const db = client.db('PeerGroupFinder');
+      const result = await db.collection('Groups').insertOne(newGroup);
+  
+      let group = null;
+      let retries = 0;
+      const maxRetries = 10;
+      
+      while (retries < maxRetries) {
+        group = await db.collection('Groups').findOne({_id: result.insertedId});
+        
+        if (group && group.GroupId) {
+          console.log(`GroupId found after ${retries} retries`);
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 100)); 
+        retries++;
+      }
+  
+      if (!group || !group.GroupId) {
+        throw new Error('Failed to get GroupId after maximum retries');
+      }
+  
+      const result2 = await db.collection('Users').updateOne(
+        {UserId: Owner},
+        {$addToSet: {
+          OwnerOfGroup: group.GroupId, 
+          Group: group.GroupId
+        }}
+      );
+  
+      if (result2.matchedCount === 0) {
+        throw new Error('User not found');
+      }
+  
+      if (result2.modifiedCount === 0) {
+        console.log('Group IDs already existed in user arrays');
+      }
+  
+      res.status(200).json({ error: '', groupId: group.GroupId });
+    }
+    catch(e)
+    {
+      error = e.toString();
+      console.error('Error in addgroup:', error);
+      res.status(500).json({ error: error });
+      return;
+    }
+  });
 
 app.get('/api/getgroupdetails', async (req, res, next) => {
   const { name } = req.query;
