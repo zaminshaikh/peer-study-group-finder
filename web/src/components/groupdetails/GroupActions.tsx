@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StudyGroup } from "../types";
 import { motion } from "framer-motion";
 import { Trash2, LogOut } from "lucide-react";
@@ -35,12 +35,17 @@ const GroupActions: React.FC<GroupActionsProps> = ({
   handleDelete,
   handleJoinGroup,
   handleLeaveGroup,
+  group,
 }) => {
   const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = React.useState(false);
   const showButton =
     context === "dashboard" || (context === "mygroups" && isMember);
   const showEditDelete = context === "mygroups" && isOwner && !isEditing;
   const showGoToMyGroups = context === "dashboard" && isOwner;
+
+  useEffect(() => {
+    setIsLeaveConfirmOpen(false);
+  }, [group]);
 
   const onJoinGroup = async () => {
     setIsLeaveConfirmOpen(false); // Reset leave confirmation state
