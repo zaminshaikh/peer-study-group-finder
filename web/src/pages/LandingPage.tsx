@@ -44,37 +44,37 @@ const LandingPage = () => {
     {
       title: "Scott Kuang",
       role: "Project Manager",
-      body: "some text",
       image: headshot_scott,
+      linkedin: "https://www.linkedin.com/in/scott-kuang-30a0772b0/", // Replace with actual LinkedIn URL
     },
     {
       title: "Malak Elsayed",
       role: "Frontend Web Developer",
-      body: "some description +linkedin",
       image: headshot_malak,
+      linkedin: "https://www.linkedin.com/in/elsayedmal", // Replace with actual LinkedIn URL
     },
     {
       title: "Zahrah Rashid",
       role: "Frontend Web Developer",
-      body: "some description +linkedin",
       //image: headshot_zahrah,
+      linkedin: "https://www.linkedin.com/in/zahrah-rashid/", // Replace with actual LinkedIn URL
     },
     {
       title: "Zamin Shaikh",
       role: "Frontend Mobile Developer",
-      body: "some description +linkedin",
       image: headshot_zamin,
+      linkedin:
+        "https://www.linkedin.com/in/zamin-shaikh/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", // Replace with actual LinkedIn URL
     },
     {
       title: "Alexander Negron",
       role: "API/Database Engineer",
-      body: "some description +linkedin",
       image: headshot_alex,
+      linkedin: "http://linkedin.com/in/alexander-negron", // Replace with actual LinkedIn URL
     },
     {
       title: "Jason Torres",
       role: "API/Database Engineer",
-      body: "some description +linkedin",
       //image: headshot_jason,
     },
   ];
@@ -188,13 +188,20 @@ const LandingPage = () => {
                   >
                     <div className="flex flex-col items-center text-center">
                       <div className="mb-4">
-                        <div className="w-40 h-40 rounded-full overflow-hidden ring-2 ring-yellow-600/20 group-hover:ring-yellow-600/40 transition-all duration-300">
-                          <img
-                            className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
-                            src={item.image}
-                            alt={`${item.title}'s headshot`}
-                          />
-                        </div>
+                        <a
+                          href={item.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-40 h-40 rounded-full overflow-hidden ring-2 ring-yellow-600/20 group-hover:ring-yellow-600/40 transition-all duration-300"
+                        >
+                          {item.image && (
+                            <img
+                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-300"
+                              src={item.image}
+                              alt={`${item.title}'s headshot`}
+                            />
+                          )}
+                        </a>
                       </div>
                       <div className="space-y-2">
                         <h3 className="text-lg font-bold text-yellow-600">
@@ -203,7 +210,6 @@ const LandingPage = () => {
                         <p className="text-yellow-600/70 font-medium">
                           {item.role}
                         </p>
-                        <p className="text-gray-400 text-sm">{item.body}</p>
                       </div>
                     </div>
                   </div>
