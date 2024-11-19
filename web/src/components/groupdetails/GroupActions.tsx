@@ -45,6 +45,7 @@ const GroupActions: React.FC<GroupActionsProps> = ({
 
   useEffect(() => {
     setIsLeaveConfirmOpen(false);
+    setIsDeleteConfirmOpen(false);
   }, [group]);
 
   const onJoinGroup = async () => {
