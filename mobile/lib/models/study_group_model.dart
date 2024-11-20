@@ -37,4 +37,5 @@ class StudyGroup {
       // createdAt: DateTime.parse(json['CreatedAt']),
     );
   }
+  
 }

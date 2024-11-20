@@ -156,6 +156,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                   const SizedBox(height: 16),
                   // Class
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Icon(Icons.class_),
                       const SizedBox(width: 8),
@@ -171,6 +172,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                   // Description
                   if (group.description.isNotEmpty)
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Icon(Icons.description),
                         const SizedBox(width: 8),
@@ -182,8 +184,70 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                         ),
                       ],
                     ),
-                  // [Add other group details as needed]
-
+                  const SizedBox(height: 12),
+                  // Size
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.group),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Group Size: ${group.size}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  // Modality
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.device_hub),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Modality: ${group.modality}',
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (group.location != null && group.location!.isNotEmpty)
+                    const SizedBox(height: 12),
+                  // Location
+                  if (group.location != null && group.location!.isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.location_on),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Location: ${group.location}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
+                  if (group.meetingTime != null && group.meetingTime!.isNotEmpty)
+                    const SizedBox(height: 12),
+                  // Meeting Time
+                  if (group.meetingTime != null && group.meetingTime!.isNotEmpty)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(Icons.schedule),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Meeting Time: ${group.meetingTime}',
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                      ],
+                    ),
                   const Spacer(),
                   SizedBox(
                     width: double.infinity,
