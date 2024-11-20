@@ -155,9 +155,15 @@ const LandingPage = () => {
                   <p className="text-white text-xl mb-4 font-medium text-center">
                     Join the Buzz and Ace Your Classes 🐝
                   </p>
-                  <p className="text-gray-300 text-lg leading-relaxed mb-8 max-w-xl mx-auto text-center">
-                    StudyHive transforms how students collaborate, insert some
-                    cheesy line about becoming successful together.
+                  {/* <p className="text-gray-300 text-lg leading-relaxed mb-4 max-w-xl mx-auto text-center">
+                    StudyHive transforms how students collaborate.
+                  </p> */}
+                  <p
+                    style={{ fontStyle: "italic" }}
+                    className="text-gray-300 mb-4"
+                  >
+                    The strength of the hive lies in the power of its bees
+                    working together.
                   </p>
                   <button
                     onClick={handleSignupClick}
