@@ -90,7 +90,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
         }
 
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:8000/api/addgroup'),
+          Uri.parse('http://studyhive.me:5000/api/addgroup'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'Name': nameController.text,

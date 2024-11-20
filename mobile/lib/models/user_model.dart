@@ -6,7 +6,7 @@ class User {
   final String lastName;
   final String displayName;
   final String email;
-  final List<String> group;
+  final List<int> group;
 
   User({
     required this.userId,
@@ -24,7 +24,7 @@ class User {
       lastName: json['LastName'],
       displayName: json['DisplayName'],
       email: json['Email'],
-      group: List<String>.from(json['Group']),
+      group: List<int>.from(json['Group']),
     );
   }
 

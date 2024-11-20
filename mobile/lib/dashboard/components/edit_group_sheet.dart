@@ -132,7 +132,7 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
       }
 
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/editgroup'),
+        Uri.parse('http://studyhive.me:5000/api/editgroup'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'UserId': user!.userId,

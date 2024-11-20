@@ -63,7 +63,7 @@ class DashboardPageState extends State<DashboardPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:8000/api/fetchgroups'),
+        Uri.parse('http://studyhive.me:5000/api/fetchgroups'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({}), // Sending an empty body since no parameters are needed
       );
@@ -76,7 +76,7 @@ class DashboardPageState extends State<DashboardPage> {
 
         for (var groupData in data['results']) {
           groupList.add(StudyGroup(
-            id: groupData['GroupId'].toString(), // Ensure consistent ID format
+            id: groupData['GroupId'],
             name: groupData['Name'],
             description: groupData['Description'] ?? '',
             className: groupData['Class'] ?? '',
@@ -132,7 +132,7 @@ class DashboardPageState extends State<DashboardPage> {
   }
 
   /// Determines if the user has joined a particular group
-  bool isUserJoined(String groupId, int groupOwnerId) {
+  bool isUserJoined(int groupId, int groupOwnerId) {
     if (user == null) return false;
     return user!.userId != groupOwnerId && user!.group.contains(groupId);
   }
@@ -234,6 +234,7 @@ class DashboardPageState extends State<DashboardPage> {
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
+            key: Key('logoutButton'),
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Logout',
@@ -286,6 +287,7 @@ class DashboardPageState extends State<DashboardPage> {
                 : filteredGroups.isEmpty
                     ? const Center(child: Text('No groups found.'))
                     : ListView.builder(
+                        key: Key('groupsList'),
                         itemCount: filteredGroups.length,
                         itemBuilder: (context, index) {
                           final group = filteredGroups[index];

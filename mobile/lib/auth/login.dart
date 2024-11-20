@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
 
   void handleLogin() async {
-    const String apiUrl = 'http://10.0.2.2:8000/api/login';
+    const String apiUrl = 'http://studyhive.me:5000/api/login';
 
     final Map<String, dynamic> requestBody = {
       'Email': emailController.text.trim(),
@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode == 200) {
         if (responseData['error'] == '') {
-          User user = User.fromJson(responseData['user']);
+          User user = User.fromJson(responseData);
           String userJson = jsonEncode(user.toJson());
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('user', userJson);
@@ -58,6 +58,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     } catch (e) {
+      print(e);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Network error. Please check your connection.')),
       );
@@ -94,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
               Text('Welcome Back', style: headlineStyle),
               const SizedBox(height: 32),
               CustomTextField(
+                key: const Key("emailField"),
                 controller: emailController,
                 hintText: 'Email Address',
                 icon: Icons.email_outlined,
@@ -101,6 +103,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 16),
               CustomTextField(
+                key: const Key("passwordField"),
                 controller: passwordController,
                 hintText: 'Password',
                 icon: Icons.lock_outline,

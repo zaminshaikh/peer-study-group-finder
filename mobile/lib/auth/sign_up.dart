@@ -20,7 +20,7 @@ class _SignUpPageState extends State<SignUpPage> {
   bool isSubmitting = false;
 
   void handleSignUp() async {
-    const String apiUrl = 'http://10.0.2.2:8000/api/register';
+    const String apiUrl = 'http://studyhive.me:5000/api/register';
 
     final Map<String, dynamic> requestBody = {
       'FirstName': nameController.text.split(' ').first,
@@ -63,7 +63,7 @@ class _SignUpPageState extends State<SignUpPage> {
             'DisplayName': responseData['DisplayName'],
             'Email': responseData['Email'],
             'Group': responseData['Group'] != null
-                ? List<String>.from(responseData['Group'])
+                ? List<int>.from(responseData['Group'])
                 : [],
           });
 

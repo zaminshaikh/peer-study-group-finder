@@ -32,7 +32,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // Function to request password reset
   void requestPasswordReset() async {
-    final String apiUrl = 'http://10.0.2.2:8000/api/forgotpasswordverification';
+    final String apiUrl = 'http://studyhive.me:5000/api/forgotpasswordverification';
     final String email = emailController.text.trim();
 
     if (email.isEmpty) {
@@ -91,7 +91,7 @@ class ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   // Function to reset password
   void resetPassword() async {
-    final String apiUrl = 'http://10.0.2.2:8000/api/changepassword';
+    final String apiUrl = 'http://studyhive.me:5000/api/changepassword';
     final String code = codeController.text.trim();
     final String newPassword = newPasswordController.text.trim();
     final String confirmNewPassword = confirmNewPasswordController.text.trim();

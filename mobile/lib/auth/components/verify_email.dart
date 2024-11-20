@@ -31,7 +31,7 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
       return;
     }
 
-    final apiUrl = 'http://10.0.2.2:8000/api/verifyemail';
+    final apiUrl = 'http://studyhive.me:5000/api/verifyemail';
     final requestBody = {
       'UserId': userId,
       'InputVerificationCode': int.parse(codeController.text.trim()),
@@ -52,7 +52,7 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
           const SnackBar(content: Text('Email verified successfully!')),
         );
 
-        final String apiUrl = 'http://10.0.2.2:8000/api/login';
+        final String apiUrl = 'http://studyhive.me:5000/api/login';
 
         final Map<String, dynamic> loginRequest = {
           'Email': prefs.getString('email')?.trim() ?? '',
@@ -112,7 +112,7 @@ class VerifyEmailPageState extends State<VerifyEmailPage> {
       return;
     }
 
-    final apiUrl = 'http://10.0.2.2:8000/api/resendverificationemail';
+    final apiUrl = 'http://studyhive.me:5000/api/resendverificationemail';
     final requestBody = {
       'UserId': userId,
     };
