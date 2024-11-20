@@ -10,6 +10,7 @@ import MyGroups from "./pages/MyGroupsPage";
 import ProfilePage from "./pages/ProfilePage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import EasterEgg from "./components/easteregg/EasterEgg";
 
 const App = () => {
   return (
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/profilePage" element={<ProfilePage />} />
           <Route path="/forgot-Password" element={<ForgotPasswordPage />} />
           <Route path="/reset-Password" element={<ResetPasswordPage />} />
+          <Route path="/donthaveone" element={<EasterEgg />} />
         </Routes>
       </BrowserRouter>
     </>

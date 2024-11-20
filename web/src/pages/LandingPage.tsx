@@ -4,6 +4,7 @@ import headshot_scott from "../imgs/headshot_scott.webp";
 import headshot_alex from "../imgs/headshot_alex.webp";
 import headshot_malak from "../imgs/headshot_malak.jpg";
 import headshot_zamin from "../imgs/headshot_zamin.webp";
+import headshot_zahrah from "../imgs/headshot_zahrah.jpg";
 import StudyHiveStudyHive_Logo_1 from "../imgs/StudyHive_Logo_1.webp";
 
 const LandingPage = () => {
@@ -30,9 +31,7 @@ const LandingPage = () => {
     });
   };
 
-  // Add useEffect to scroll to What is StudyHive section on page load
   useEffect(() => {
-    // Add a small delay to ensure the page is fully loaded
     const timer = setTimeout(() => {
       scrollToSection(magnetoRef);
     }, 100);
@@ -45,37 +44,38 @@ const LandingPage = () => {
       title: "Scott Kuang",
       role: "Project Manager",
       image: headshot_scott,
-      linkedin: "https://www.linkedin.com/in/scott-kuang-30a0772b0/", // Replace with actual LinkedIn URL
+      linkedin: "https://www.linkedin.com/in/scott-kuang-30a0772b0/",
     },
     {
       title: "Malak Elsayed",
       role: "Frontend Web Developer",
       image: headshot_malak,
-      linkedin: "https://www.linkedin.com/in/elsayedmal", // Replace with actual LinkedIn URL
+      linkedin: "https://www.linkedin.com/in/elsayedmal",
     },
     {
       title: "Zahrah Rashid",
       role: "Frontend Web Developer",
-      //image: headshot_zahrah,
-      linkedin: "https://www.linkedin.com/in/zahrah-rashid/", // Replace with actual LinkedIn URL
+      image: headshot_zahrah,
+      linkedin: "https://www.linkedin.com/in/zahrah-rashid/",
     },
     {
       title: "Zamin Shaikh",
       role: "Frontend Mobile Developer",
       image: headshot_zamin,
       linkedin:
-        "https://www.linkedin.com/in/zamin-shaikh/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app", // Replace with actual LinkedIn URL
+        "https://www.linkedin.com/in/zamin-shaikh/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
     },
     {
       title: "Alexander Negron",
       role: "API/Database Engineer",
       image: headshot_alex,
-      linkedin: "http://linkedin.com/in/alexander-negron", // Replace with actual LinkedIn URL
+      linkedin: "http://linkedin.com/in/alexander-negron",
     },
     {
       title: "Jason Torres",
       role: "API/Database Engineer",
       //image: headshot_jason,
+      linkedin: "/donthaveone", // Changed to the new URL path
     },
   ];
 
