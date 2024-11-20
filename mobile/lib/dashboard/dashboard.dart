@@ -230,11 +230,12 @@ class DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        key: const Key('studyGroupsAppBar'),
         title: const Text('Study Groups'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            key: Key('logoutButton'),
+            key: const Key('logoutButton'),
             icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Logout',

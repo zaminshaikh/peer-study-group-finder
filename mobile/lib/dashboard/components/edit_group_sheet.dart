@@ -39,6 +39,12 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
 
   User? user;
 
+  static var mapCodeToIndex = {
+    "ACG": 0, "AMH": 1, "AML": 2, "BCH": 3, "BME": 4, "BSC": 5,
+    "CAP": 6, "CDA": 7, "CEN": 8, "COT": 9, "COP": 10, "PHY": 11,
+    "PSY": 12
+  };
+
   @override
   void initState() {
     super.initState();
@@ -94,6 +100,42 @@ class _EditGroupSheetState extends State<EditGroupSheet> {
     setState(() {
       classesList = classList;
     });
+  }
+
+  Future<String> convertToClassCode(String codeAndName) async {
+    final jsonString = await rootBundle.loadString('assets/classes.json');
+    final data = jsonDecode(jsonString);
+    return codeAndName.substring(0,3) + codeAndName.substring(4, codeAndName.indexOf('-') - 1);
+  }
+
+  Future<String> convertToClassCodeAndName(String code) async {
+    final jsonString = await rootBundle.loadString('assets/classes.json');
+    final data = jsonDecode(jsonString);
+
+    String departmentFromCode = code.substring(0, 3);
+    String courseNumberFromCode = code.substring(3);
+
+    for (var department in data['departments']) {
+      if (department['code'] == departmentFromCode) {
+        for (var course in department['courses']) {
+          if (course['number'] == courseNumberFromCode) {
+            return ('${department['code']} ${course['number']} - ${course['title']}');
+          }
+        }
+      }
+    }
+
+    return "PSY7980";
+
+    /*
+    int? departmentIndex = mapCodeToIndex[departmentFromCode];
+    data['departments'][departmentIndex];]
+      for (var course in department['courses']) {
+        if (department['code'] == code)
+        return ('${department['code']} ${course['number']} - ${course['title']}');
+      }
+    */  
+
   }
 
   Future<void> loadUser() async {
