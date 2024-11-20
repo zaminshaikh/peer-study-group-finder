@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:mobile/models/user_model.dart';
 
+
+
 class CreateGroupSheet extends StatefulWidget {
   const CreateGroupSheet({Key? key}) : super(key: key);
 
@@ -19,7 +21,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final locationController = TextEditingController();
-  final meetingTimeController = TextEditingController();
+  final meetingTimeController = TextEditingController();  
 
   bool isSubmitting = false;
 
@@ -62,6 +64,8 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
     });
   }
 
+  
+
   void createGroup() async {
     if (_formKey.currentState!.validate()) {
       setState(() => isSubmitting = true);
@@ -95,7 +99,7 @@ class _CreateGroupSheetState extends State<CreateGroupSheet> {
           body: jsonEncode({
             'Name': nameController.text,
             'Description': descriptionController.text,
-            'Class': selectedClass,
+            'Class': selectedClass == null ? selectedClass : selectedClass!.substring(0,3) + selectedClass!.substring(4, selectedClass!.indexOf('-') - 1),
             'Owner': userId,
             'Size': groupSize,
             'Modality': selectedModality,
