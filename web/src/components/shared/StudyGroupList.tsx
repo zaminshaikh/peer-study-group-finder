@@ -21,11 +21,6 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
   onKickSuccess,
   context = "search",
 }) => {
-  const [showKickConfirm, setShowKickConfirm] = useState<{
-    groupId: number | null;
-    studentId: number | null;
-  } | null>(null);
-
   const [expandedGroupMembers, setExpandedGroupMembers] = useState<
     number | null
   >(null);
@@ -48,7 +43,6 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
         throw new Error("Failed to kick student");
       }
 
-      setShowKickConfirm(null);
       if (onKickSuccess) {
         onKickSuccess();
       }
@@ -142,10 +136,7 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setShowKickConfirm({
-                                  groupId: group.groupId!,
-                                  studentId: studentId,
-                                });
+                                handleKickStudent(group.groupId!, studentId);
                               }}
                               className="text-red-600 hover:text-red-800 flex items-center gap-1"
                             >
@@ -167,45 +158,6 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
               {group.meetingTime && (
                 <p className="mt-1">🕒 Meeting Time: {group.meetingTime}</p>
               )}
-            </div>
-          )}
-
-          {showKickConfirm && showKickConfirm.groupId === group.groupId && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-                <h3 className="text-xl font-bold mb-4">Confirm Action</h3>
-                <p className="mb-4">
-                  Are you sure you want to kick this student from the group?
-                </p>
-                <div className="flex justify-end space-x-4">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowKickConfirm(null);
-                    }}
-                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (
-                        showKickConfirm.groupId &&
-                        showKickConfirm.studentId
-                      ) {
-                        handleKickStudent(
-                          showKickConfirm.groupId,
-                          showKickConfirm.studentId
-                        );
-                      }
-                    }}
-                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    Confirm
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>

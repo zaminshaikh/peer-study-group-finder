@@ -37,71 +37,40 @@ const GroupActions: React.FC<GroupActionsProps> = ({
   handleLeaveGroup,
   group,
 }) => {
-  const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = React.useState(false);
+  useEffect(() => {
+    setIsDeleteConfirmOpen(false);
+  }, [group]);
+
   const showButton =
     context === "dashboard" || (context === "mygroups" && isMember);
   const showEditDelete = context === "mygroups" && isOwner && !isEditing;
   const showGoToMyGroups = context === "dashboard" && isOwner;
-
-  useEffect(() => {
-    setIsLeaveConfirmOpen(false);
-    setIsDeleteConfirmOpen(false);
-  }, [group]);
-
-  const onJoinGroup = async () => {
-    setIsLeaveConfirmOpen(false); // Reset leave confirmation state
-    await handleJoinGroup(); // Call the actual join group logic
-  };
 
   return (
     <div className="space-y-2">
       {showButton && !isOwner && (
         <>
           {isMember ? (
-            isLeaveConfirmOpen ? (
-              <div className="space-y-2">
-                <p className="text-white text-sm text-center">
-                  Are you sure you want to leave this group?
-                </p>
-                <div className="flex gap-2 justify-center">
-                  <button
-                    onClick={handleLeaveGroup}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-transform duration-200 transform hover:scale-105 flex items-center gap-2"
-                    disabled={isLoading}
-                  >
-                    <LogOut size={16} />
-                    {isLoading ? "Leaving..." : "Confirm Leave"}
-                  </button>
-                  <button
-                    onClick={() => setIsLeaveConfirmOpen(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-transform duration-200 transform hover:scale-105 flex items-center"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <motion.button
-                className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
-                  bg-red-500 hover:bg-red-600 text-white
-                  focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
-                  disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                onClick={() => setIsLeaveConfirmOpen(true)}
-                disabled={isLoading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <LogOut size={20} />
-                {isLoading ? "Leaving..." : "Leave Group"}
-              </motion.button>
-            )
+            <motion.button
+              className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
+                bg-red-500 hover:bg-red-600 text-white
+                focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={handleLeaveGroup}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <LogOut size={20} />
+              {isLoading ? "Leaving..." : "Leave Group"}
+            </motion.button>
           ) : (
             <motion.button
               className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
                 bg-green-500 hover:bg-green-600 text-white
                 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
                 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={onJoinGroup} // Use the updated join handler
+              onClick={handleJoinGroup}
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
