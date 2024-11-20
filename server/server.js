@@ -289,43 +289,6 @@ app.post('/api/changepassword', async (req, res, next) => {
   }
 });
 
-
-// // Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
-// app.post('/api/addgroup', async (req, res, next) =>
-// {
-//   // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
-//   // outgoing: error
-	
-//   const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
-
-//   const Students = [Owner];
-//   const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:Students, Size:Size, Location:Location, MeetingTime:MeetingTime};
-//   var error = '';
-
-//   try
-//   {
-//     const db = client.db('PeerGroupFinder');
-//     const result = await db.collection('Groups').insertOne(newGroup);
-
-//     const group = await db.collection('Groups').findOne({_id: result.insertedId});
-//     const GroupId = group.GroupId;
-
-//     const result2 = await db.collection('Users').updateOne(
-//       {UserId:Owner},
-//       {$addToSet: {OwnerOfGroup:GroupId, Group:GroupId}}
-//     );
-
-//   }
-//   catch(e)
-//   {
-//     error = e.toString();
-//   }
-
-//   var ret = { error: error };
-//   res.status(200).json(ret);
-// });
-
-
 app.post('/api/addgroup', async (req, res, next) =>
   {
     // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
@@ -424,6 +387,27 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     groupId: group.GroupId,
     students: group.Students
   });
+});
+
+app.get('/api/getstudentinfo', async (req, res, next) => {
+  try {
+    const { studentId } = req.query;
+    const db = client.db('PeerGroupFinder');
+    
+    const student = await db.collection('Users').findOne({ UserId: parseInt(studentId) });
+    
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    
+    res.status(200).json({
+      firstName: student.FirstName,
+      lastName: student.LastName
+    });
+  } catch (error) {
+    console.error('Error fetching student info:', error);
+    res.status(500).json({ error: 'An error occurred while fetching student info' });
+  }
 });
 
 app.post('/api/searchgroups', async (req, res, next) => 

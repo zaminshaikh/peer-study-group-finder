@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Crown, UserX, Users } from "lucide-react";
 import { StudyGroup } from "../types";
 
 const apiUrl = import.meta.env.VITE_API_URL;
+
+interface StudentInfo {
+  firstName: string;
+  lastName: string;
+}
 
 interface StudyGroupListProps {
   groups: StudyGroup[];
@@ -24,6 +29,40 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
   const [expandedGroupMembers, setExpandedGroupMembers] = useState<
     number | null
   >(null);
+  const [studentInfoMap, setStudentInfoMap] = useState<{
+    [key: number]: StudentInfo;
+  }>({});
+
+  const fetchStudentInfo = async (studentId: number) => {
+    try {
+      const response = await fetch(
+        `${apiUrl}api/getstudentinfo?studentId=${studentId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch student info");
+      }
+      const data = await response.json();
+      setStudentInfoMap((prev) => ({
+        ...prev,
+        [studentId]: { firstName: data.firstName, lastName: data.lastName },
+      }));
+    } catch (error) {
+      console.error("Error fetching student info:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (expandedGroupMembers) {
+      const group = groups.find((g) => g.groupId === expandedGroupMembers);
+      if (group && group.students) {
+        group.students.forEach((studentId) => {
+          if (studentId !== userId && !studentInfoMap[studentId]) {
+            fetchStudentInfo(studentId);
+          }
+        });
+      }
+    }
+  }, [expandedGroupMembers, groups, userId]);
 
   const handleKickStudent = async (groupId: number, studentId: number) => {
     try {
@@ -58,6 +97,13 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
 
   const canManageMembers = (group: StudyGroup) => {
     return context === "mygroups" && group.owner === userId;
+  };
+
+  const renderStudentName = (studentId: number) => {
+    const studentInfo = studentInfoMap[studentId];
+    return studentInfo
+      ? `${studentInfo.firstName} ${studentInfo.lastName}`
+      : `Student #${studentId}`;
   };
 
   return (
@@ -132,7 +178,7 @@ const StudyGroupList: React.FC<StudyGroupListProps> = ({
                             key={studentId}
                             className="flex items-center justify-between bg-gray-50 p-2 rounded"
                           >
-                            <span>Student #{studentId}</span>
+                            <span>{renderStudentName(studentId)}</span>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
