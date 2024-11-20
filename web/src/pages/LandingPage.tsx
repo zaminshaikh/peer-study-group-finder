@@ -152,7 +152,7 @@ const LandingPage = () => {
                     />
                   </div>
 
-                  <p className="text-white text-xl mb-4 font-medium text-center">
+                  <p className="text-white text-xl mb-2 font-medium text-center">
                     Join the Buzz and Ace Your Classes 🐝
                   </p>
                   {/* <p className="text-gray-300 text-lg leading-relaxed mb-4 max-w-xl mx-auto text-center">
