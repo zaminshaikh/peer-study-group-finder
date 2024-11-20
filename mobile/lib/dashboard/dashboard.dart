@@ -198,14 +198,14 @@ class DashboardPageState extends State<DashboardPage> {
       isScrollControlled: true,
       builder: (_) => GroupDetailsSheet(group: group),
     ).then((result) async {
-      if (result == 'joined' || result == 'left') {
+      // if (result == 'joined' || result == 'left' || result == 'deleted') {
         // Reload user data to reflect changes in group memberships
         await loadUser();
         // Refresh the UI to show updated join status
         setState(() {
           _applyFilters();
         });
-      }
+      // }
     });
   }
 
