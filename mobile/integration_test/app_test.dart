@@ -16,7 +16,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final loginStartFinder = find.byType(TextButton);
-      expect(loginStartFinder, findsOne);
+      expect(loginStartFinder, findsOne); // Confirms landing page is present
 
       await tester.tap(loginStartFinder);
 
@@ -34,7 +34,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final listFinder = find.byType(ListView);
-      expect(listFinder, findsAny);
+      expect(listFinder, findsAny); // Confirms login was successful, goes to dashboard page, groups are loaded
 
       await tester.pumpAndSettle();
 
@@ -44,7 +44,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final landingFinder = find.text('Welcome to StudyHive');
-      expect(landingFinder, findsOne);
+      expect(landingFinder, findsOne); // Confirms logout was successful, and boots to landing page
     });
   });
 }
