@@ -168,9 +168,9 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
                   // Description
-                  if (group.description.isNotEmpty)
+                  if (group.description.isNotEmpty) ...[
+                    const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -184,8 +184,9 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                         ),
                       ],
                     ),
-                  const SizedBox(height: 12),
+                  ],
                   // Size
+                  const SizedBox(height: 12),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -214,10 +215,9 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                       ),
                     ],
                   ),
-                  if (group.location != null && group.location!.isNotEmpty)
+                  if (group.location != null && group.location!.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                  // Location
-                  if (group.location != null && group.location!.isNotEmpty)
+                    // Location
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -231,10 +231,10 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                         ),
                       ],
                     ),
-                  if (group.meetingTime != null && group.meetingTime!.isNotEmpty)
+                  ],
+                  if (group.meetingTime != null && group.meetingTime!.isNotEmpty) ...[
                     const SizedBox(height: 12),
-                  // Meeting Time
-                  if (group.meetingTime != null && group.meetingTime!.isNotEmpty)
+                    // Meeting Time
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -248,6 +248,7 @@ class _GroupDetailsSheetState extends State<GroupDetailsSheet> {
                         ),
                       ],
                     ),
+                  ],
                   const Spacer(),
                   SizedBox(
                     width: double.infinity,
