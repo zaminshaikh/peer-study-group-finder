@@ -50,7 +50,7 @@ const SideBar = () => {
     localStorage.removeItem("UserId");
     localStorage.removeItem("username");
     console.log("removed userId and username");
-    navigate("/login");
+    navigate("/");
     console.log("navigating to login page");
     setUserId(null);
     setUsername("");
@@ -137,7 +137,7 @@ const SideBar = () => {
           <SideBarLink
             name="Logout"
             isOpen={isOpen}
-            to="/login"
+            to="/"
             onClick={handleLogout}
           >
             <ArrowLeftOnRectangleIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
