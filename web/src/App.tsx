@@ -10,27 +10,28 @@ import MyGroups from "./pages/MyGroupsPage";
 import ProfilePage from "./pages/ProfilePage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import EasterEgg from "./components/easteregg/EasterEgg";
 
 const App = () => {
   return (
     <>
       <div className="overflow-hidden">
         <FloatingShape
-          color="bg-yellow-500"
+          color="bg-gradient-to-r from-yellow-500 to-amber-700"
           size="w-64 h-64"
           top="10%"
           left="20%"
           delay={0}
         />
         <FloatingShape
-          color="bg-yellow-500"
+          color="bg-gradient-to-r from-yellow-500 to-amber-700"
           size="w-48 h-48"
           top="50%"
           left="70%"
           delay={2}
         />
         <FloatingShape
-          color="bg-yellow-500"
+          color="bg-gradient-to-r from-yellow-500 to-amber-700"
           size="w-32 h-32"
           top="80%"
           left="10%"
@@ -48,6 +49,7 @@ const App = () => {
           <Route path="/profilePage" element={<ProfilePage />} />
           <Route path="/forgot-Password" element={<ForgotPasswordPage />} />
           <Route path="/reset-Password" element={<ResetPasswordPage />} />
+          <Route path="/donthaveone" element={<EasterEgg />} />
         </Routes>
       </BrowserRouter>
     </>

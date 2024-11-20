@@ -35,6 +35,8 @@ const LoginPage = () => {
       // Handle successful registration (e.g., redirect to login or show success message)
       //localStorage.setItem("displayName", data.displayName);
       localStorage.setItem("UserId", data.UserId.toString());
+      localStorage.setItem("username", data.DisplayName);
+      console.log("Logged in username:", data.DisplayName);
       console.log("Login successful:");
       navigate("/dashboard");
     }
@@ -81,7 +83,7 @@ const LoginPage = () => {
               </Link>
             </div>
             {error && (
-              <p className="text-sm text-red-500 mt-[-12px]">{error}</p> // Display error message in red
+              <p className="text-sm mb-2 text-red-500 mt-[-12px]">{error}</p> // Display error message in red
             )}
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -114,6 +116,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-function setError(_error: any) {
-  throw new Error("Function not implemented.");
-}

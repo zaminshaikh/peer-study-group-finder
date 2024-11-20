@@ -1,14 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import Input from "../Input";
-import {
-  Users,
-  FileText,
-  Calendar,
-  MapPin,
-  Link as LinkIcon,
-  X,
-} from "lucide-react";
+import { FileText, MapPin, Link as LinkIcon, X } from "lucide-react";
 import Select from "react-select";
 import classesData from "../../../classes.json";
 import { StudyGroup } from "../types";
@@ -21,6 +14,15 @@ interface CreateGroupModalProps {
   userId: number;
 }
 
+type DayType =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
+
 const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   onCreateGroup,
   setShowCreateGroupModal,
@@ -29,14 +31,44 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [class_, setClass] = useState("");
-  const [size, setSize] = useState<number | "">("");
+  const [size, setSize] = useState<number>(2);
   const [modality, setModality] = useState<
     "In-Person" | "Online" | "Hybrid" | ""
   >("");
   const [location, setLocation] = useState("");
-  const [meetingTime, setMeetingTime] = useState("");
-  const [link, setLink] = useState(""); // New state for the link
-  const [errorMessage, setErrorMessage] = useState(""); // State for error message
+  const [selectedDays, setSelectedDays] = useState<DayType[]>([]);
+  const [selectedHour, setSelectedHour] = useState("12");
+  const [selectedMinute, setSelectedMinute] = useState("00");
+  const [selectedAmPm, setSelectedAmPm] = useState("AM");
+  const [link, setLink] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const days: DayType[] = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  const dayAbbreviations: Record<DayType, string> = {
+    Monday: "Mon",
+    Tuesday: "Tue",
+    Wednesday: "Wed",
+    Thursday: "Thu",
+    Friday: "Fri",
+    Saturday: "Sat",
+    Sunday: "Sun",
+  };
+
+  const hours = Array.from({ length: 12 }, (_, i) =>
+    (i + 1).toString().padStart(2, "0")
+  );
+  const minutes = Array.from({ length: 60 }, (_, i) =>
+    i.toString().padStart(2, "0")
+  );
 
   // Prepare options for react-select dropdown
   const classOptions = classesData.departments.flatMap((department) =>
@@ -46,29 +78,42 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
     }))
   );
 
+  const handleDayToggle = (day: DayType) => {
+    setSelectedDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
   const handleCreateGroup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validation check
+    const formattedTime = `${selectedHour}:${selectedMinute} ${selectedAmPm}`;
+    const meetingTime =
+      selectedDays.length > 0
+        ? `${selectedDays.join(", ")} at ${formattedTime}`
+        : "";
+
     if (
       !name ||
       !description ||
       !size ||
       !location ||
-      !meetingTime ||
+      selectedDays.length === 0 ||
+      !selectedHour ||
+      !selectedMinute ||
       !link ||
       !class_ ||
       !modality
     ) {
       setErrorMessage("Please fill in all the mandatory fields.");
-      return; // Prevent form submission if mandatory fields are empty
+      return;
     }
 
-    setErrorMessage(""); // Clear any previous error message
+    setErrorMessage("");
     console.log("creating group user id: ", userId);
 
     try {
-      const response = await fetch(apiUrl + "api/addgroup", {
+      const response = await fetch(`${apiUrl}api/addgroup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -96,7 +141,7 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
           modality,
           owner: userId,
           location: location || undefined,
-          link: link || undefined, // Include link in created group
+          link: link || undefined,
           meetingTime: meetingTime || undefined,
           createdAt: new Date(),
         });
@@ -129,7 +174,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
             Create a Study Group
           </h2>
 
-          {/* Display error message if validation fails */}
           {errorMessage && (
             <div className="mb-4 text-red-500 text-center">{errorMessage}</div>
           )}
@@ -143,7 +187,6 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               onChange={(e) => setName(e.target.value)}
             />
 
-            {/* Searchable dropdown for classes */}
             <div className="mb-4 relative">
               <Select
                 options={classOptions}
@@ -155,15 +198,20 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               />
             </div>
 
-            <Input
-              Icon={Users}
-              type="number"
-              placeholder="Group Size"
-              value={size}
-              onChange={(e) =>
-                setSize(e.target.value ? parseInt(e.target.value) : "")
-              }
-            />
+            <div className="mb-4">
+              <label className="block text-white mb-2 items-center">
+                Group Size: {size}
+              </label>
+              <input
+                type="range"
+                min="2"
+                max="200"
+                value={size}
+                onChange={(e) => setSize(parseInt(e.target.value))}
+                className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
             <Input
               Icon={MapPin}
               type="text"
@@ -171,19 +219,70 @@ const CreateGroupModal: React.FC<CreateGroupModalProps> = ({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-            <Input
-              Icon={Calendar}
-              type="text"
-              placeholder="Meeting Time (e.g., T/Th, 10am - 12pm)"
-              value={meetingTime}
-              onChange={(e) => setMeetingTime(e.target.value)}
-            />
+
+            <div className="mb-4">
+              <label className="block text-white mb-2">Meeting Days</label>
+              <div className="grid grid-cols-7 gap-2">
+                {days.map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => handleDayToggle(day)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      selectedDays.includes(day)
+                        ? "bg-yellow-500 text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {dayAbbreviations[day]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Time Selection with AM/PM */}
+            <div className="mb-4">
+              <label className="block text-white mb-2">Meeting Time</label>
+              <div className="flex gap-2">
+                <select
+                  value={selectedHour}
+                  onChange={(e) => setSelectedHour(e.target.value)}
+                  className="p-2 border border-gray-300 rounded bg-gray-100 focus:ring-yellow-500"
+                >
+                  {hours.map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedMinute}
+                  onChange={(e) => setSelectedMinute(e.target.value)}
+                  className="p-2 border border-gray-300 rounded bg-gray-100 focus:ring-yellow-500"
+                >
+                  {minutes.map((minute) => (
+                    <option key={minute} value={minute}>
+                      {minute}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={selectedAmPm}
+                  onChange={(e) => setSelectedAmPm(e.target.value)}
+                  className="p-2 border border-gray-300 rounded bg-gray-100 focus:ring-yellow-500"
+                >
+                  <option value="AM">AM</option>
+                  <option value="PM">PM</option>
+                </select>
+              </div>
+            </div>
+
             <Input
               Icon={LinkIcon}
               type="text"
               placeholder="Group Link (e.g., Discord)"
               value={link}
-              onChange={(e) => setLink(e.target.value)} // New input for the link
+              onChange={(e) => setLink(e.target.value)}
             />
 
             <div className="mb-4">

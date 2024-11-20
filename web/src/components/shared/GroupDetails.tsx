@@ -7,6 +7,8 @@ import Select from "react-select";
 import classesData from "../../../classes.json";
 import { StudyGroup } from "../types";
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface GroupDetailsProps {
   group: StudyGroup;
   UserId: number;
@@ -35,6 +37,12 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
   const isOwner = group.owner === UserId;
 
   useEffect(() => {
+    setIsEditing(false);
+    setEditedGroup(group);
+    setSelectedClass(group.class);
+  }, [group]);
+
+  useEffect(() => {
     if (Array.isArray(group.students)) {
       setIsMember(group.students.includes(UserId));
     } else {
@@ -54,7 +62,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/editgroup", {
+      const response = await fetch(`${apiUrl}api/editgroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +106,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/deletegroup", {
+      const response = await fetch(`${apiUrl}api/deletegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,7 +138,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/joingroup", {
+      const response = await fetch(`${apiUrl}api/joingroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -174,7 +182,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/leavegroup", {
+      const response = await fetch(`${apiUrl}api/leavegroup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -214,8 +222,8 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
 
   // const showButton =
   //   context === "dashboard" || (context === "mygroups" && isMember);
-  const showLinks = context === "mygroups" && isMember;
-  const showRefLinks = context === "dashboard" && isMember;
+  const showLinks = context === "mygroups" && isMember && !isOwner;
+  const showRefLinks = context === "dashboard" && isMember && !isOwner;
   const showEditDelete = context === "mygroups" && isOwner;
 
   return (
@@ -404,17 +412,26 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
             <div>
               <p className="text-sm text-gray-400">Size</p>
               {isEditing ? (
-                <input
-                  type="number"
-                  value={editedGroup.size}
-                  onChange={(e) =>
-                    setEditedGroup({
-                      ...editedGroup,
-                      size: parseInt(e.target.value),
-                    })
-                  }
-                  className="bg-gray-700 text-white px-4 py-2 rounded-lg w-full border border-gray-600 focus:ring-2 focus:ring-yellow-400 focus:outline-none"
-                />
+                <div className="flex items-center">
+                  <input
+                    type="range"
+                    min="2"
+                    max="200"
+                    value={editedGroup.size}
+                    onChange={(e) => {
+                      const newSize = Math.min(
+                        Math.max(2, parseInt(e.target.value)),
+                        200
+                      );
+                      setEditedGroup({
+                        ...editedGroup,
+                        size: newSize,
+                      });
+                    }}
+                    className="bg-gray-700 h-2 rounded-lg w-full mx-2"
+                  />
+                  <span className="text-white">{editedGroup.size}</span>
+                </div>
               ) : (
                 <p className="font-medium">{group.size} members</p>
               )}
@@ -441,7 +458,7 @@ const GroupDetails: React.FC<GroupDetailsProps> = ({
             <button
               onClick={() => {
                 setIsEditing(false);
-                setEditedGroup(group); // Reset to original group details
+                setEditedGroup(group);
               }}
               className="bg-red-600 hover:bg-red-700 transition-transform duration-200 transform hover:scale-105 text-white font-bold py-2 px-4 rounded-lg"
             >

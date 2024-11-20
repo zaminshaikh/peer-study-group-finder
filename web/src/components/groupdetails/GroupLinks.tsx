@@ -41,10 +41,15 @@ const GroupLinks: React.FC<GroupLinksProps> = ({
             <div className="flex-grow">
               <p className="text-sm text-gray-400">Study Group Link</p>
               <a
-                href={group.link}
+                href={
+                  group.link.startsWith("http")
+                    ? group.link
+                    : `https://${group.link}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 transition-colors duration-200 break-all"
+                aria-label={`Open study group link ${group.link} in a new tab`}
               >
                 {group.link}
               </a>

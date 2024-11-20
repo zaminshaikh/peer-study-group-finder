@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StudyGroup } from "../types";
 import { motion } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { Trash2, LogOut } from "lucide-react";
 
 interface GroupActionsProps {
   group: StudyGroup;
@@ -35,7 +35,12 @@ const GroupActions: React.FC<GroupActionsProps> = ({
   handleDelete,
   handleJoinGroup,
   handleLeaveGroup,
+  group,
 }) => {
+  useEffect(() => {
+    setIsDeleteConfirmOpen(false);
+  }, [group]);
+
   const showButton =
     context === "dashboard" || (context === "mygroups" && isMember);
   const showEditDelete = context === "mygroups" && isOwner && !isEditing;
@@ -44,28 +49,36 @@ const GroupActions: React.FC<GroupActionsProps> = ({
   return (
     <div className="space-y-2">
       {showButton && !isOwner && (
-        <motion.button
-          className={`w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
-            ${
-              isMember
-                ? "bg-red-500 hover:bg-red-600 text-white"
-                : "bg-green-500 hover:bg-green-600 text-white"
-            }
-            focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
-            disabled:opacity-50 disabled:cursor-not-allowed`}
-          onClick={isMember ? handleLeaveGroup : handleJoinGroup}
-          disabled={isLoading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          {isLoading
-            ? isMember
-              ? "Leaving..."
-              : "Joining..."
-            : isMember
-            ? "Leave Group"
-            : "Join Group"}
-        </motion.button>
+        <>
+          {isMember ? (
+            <motion.button
+              className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
+                bg-red-500 hover:bg-red-600 text-white
+                focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
+                disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              onClick={handleLeaveGroup}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <LogOut size={20} />
+              {isLoading ? "Leaving..." : "Leave Group"}
+            </motion.button>
+          ) : (
+            <motion.button
+              className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
+                bg-green-500 hover:bg-green-600 text-white
+                focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-gray-900
+                disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleJoinGroup}
+              disabled={isLoading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              {isLoading ? "Joining..." : "Join Group"}
+            </motion.button>
+          )}
+        </>
       )}
       {showEditDelete && (
         <>
@@ -112,11 +125,11 @@ const GroupActions: React.FC<GroupActionsProps> = ({
           className="w-full py-3 px-4 rounded-lg font-bold shadow-lg transition duration-200 
             bg-blue-500 hover:bg-blue-600 text-white
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-          onClick={() => (window.location.href = "/dashboard")} // or a function to navigate to My Groups
+          onClick={() => (window.location.href = "/dashboard")}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          Head over to Dashboard to Modify
+          Head over to dashboard to modify
         </motion.button>
       )}
     </div>

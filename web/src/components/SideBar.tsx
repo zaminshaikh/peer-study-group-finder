@@ -10,24 +10,25 @@ import {
 } from "@heroicons/react/24/outline";
 
 const SideBar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true); // Changed to true
   const [, setUserId] = useState<number | null>(null);
-  //const [displayName, setDisplayName] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
   const containerControls = useAnimationControls();
   const svgControls = useAnimationControls();
   const navigate = useNavigate();
 
-  // useEffect(() => {
-  //   const storedDisplayName = localStorage.getItem("displayName");
-  //   if (storedDisplayName) {
-  //     //setDisplayName(storedDisplayName);
-  //   }
-  // }, []);
-
   useEffect(() => {
-    const storedUserId = localStorage.getItem("userId");
+    console.log("Fetching from localStorage:");
+    console.log("userId:", localStorage.getItem("UserId"));
+    console.log("username:", localStorage.getItem("username"));
+
+    const storedUserId = localStorage.getItem("UserId");
+    const storedUsername = localStorage.getItem("username");
     if (storedUserId) {
-      //setUserId(Number(storedUserId));
+      setUserId(Number(storedUserId));
+    }
+    if (storedUsername) {
+      setUsername(storedUsername);
     }
   }, []);
 
@@ -47,12 +48,12 @@ const SideBar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("UserId");
-    //localStorage.removeItem("displayName");
-    console.log("removed userId and displayname");
-    navigate("/login");
+    localStorage.removeItem("username");
+    console.log("removed userId and username");
+    navigate("/");
     console.log("navigating to login page");
     setUserId(null);
-    // setDisplayName(null);
+    setUsername("");
   };
 
   const handleDashboardClick = () => {
@@ -65,11 +66,6 @@ const SideBar = () => {
     setIsOpen(true);
   };
 
-  const handleProfilePageClick = () => {
-    navigate("/profilePage");
-    setIsOpen(true);
-  };
-
   return (
     <motion.nav
       variants={{
@@ -77,67 +73,76 @@ const SideBar = () => {
         open: { width: "16rem" },
       }}
       animate={containerControls}
-      initial="close"
-      className="bg-neutral-900 flex-col z-10 gap-20 p-5 absolute top-0 left-0 h-full shadow shadow-neutral-600"
+      initial="open" // Changed to "open"
+      className="bg-neutral-900 flex-col z-10 p-5 absolute top-0 left-0 h-full shadow shadow-neutral-600"
     >
-      <div className="flex flex-row w-full justify-between place-items-center">
-        <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 via-yellow-600 to-yellow-700 rounded-full" />
-        <button className="p-1 rounded-full flex" onClick={handleOpenClose}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1}
-            stroke="currentColor"
-            className="w-8 h-8 stroke-neutral-200"
+      <div className="flex flex-col">
+        <div className="flex flex-row w-full justify-between place-items-center">
+          <motion.div
+            className="flex items-center bg-gradient-to-r from-yellow-600 to-amber-900  rounded-lg overflow-hidden"
+            variants={{
+              close: { width: "2rem", height: "2rem" },
+              open: { width: "15rem", height: "3rem" },
+            }}
+            animate={containerControls}
           >
-            <motion.path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              variants={{
-                close: { rotate: 360 },
-                open: { rotate: 180 },
-              }}
-              animate={svgControls}
-              d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-            />
-          </svg>
-        </button>
-      </div>
-      <div className="flex flex-col gap-5">
-        <SideBarLink
-          name="Dashboard"
-          isOpen={isOpen}
-          to="/dashboard"
-          onClick={handleDashboardClick}
-        >
-          <ChartBarIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
-        </SideBarLink>
-        <SideBarLink
-          name="Study Groups"
-          isOpen={isOpen}
-          to="/studyGroups"
-          onClick={handleStudyGroupsClick}
-        >
-          <UserGroupIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
-        </SideBarLink>
-        <SideBarLink
-          name="Profile"
-          isOpen={isOpen}
-          to="/profilePage"
-          onClick={handleProfilePageClick}
-        >
-          <UserIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
-        </SideBarLink>
-        <SideBarLink
-          name="Logout"
-          isOpen={isOpen}
-          to="/login"
-          onClick={handleLogout}
-        >
-          <ArrowLeftOnRectangleIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
-        </SideBarLink>
+            <div className="pl-2 pr-4 py-2 text-neutral-200 truncate flex items-center gap-2">
+              <UserIcon className="w-8 h-8 stroke-2" />
+              <span className="text-lg">
+                {username ? `Hello ${username}!` : "Hello Guest"}
+              </span>
+            </div>
+          </motion.div>
+          <button className="p-1 rounded-full flex" onClick={handleOpenClose}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1}
+              stroke="currentColor"
+              className="w-8 h-8 stroke-neutral-200"
+            >
+              <motion.path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                variants={{
+                  close: { rotate: 360 },
+                  open: { rotate: 180 },
+                }}
+                animate={svgControls}
+                initial={{ rotate: 180 }} // Added initial rotation
+                d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="flex flex-col gap-5 mt-4">
+          <SideBarLink
+            name="Dashboard"
+            isOpen={isOpen}
+            to="/dashboard"
+            onClick={handleDashboardClick}
+          >
+            <ChartBarIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
+          </SideBarLink>
+          <SideBarLink
+            name="Study Groups"
+            isOpen={isOpen}
+            to="/studyGroups"
+            onClick={handleStudyGroupsClick}
+          >
+            <UserGroupIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
+          </SideBarLink>
+          <SideBarLink
+            name="Logout"
+            isOpen={isOpen}
+            to="/"
+            onClick={handleLogout}
+          >
+            <ArrowLeftOnRectangleIcon className="stroke-inherit stroke-[0.75] min-w-8 w-8" />
+          </SideBarLink>
+        </div>
       </div>
     </motion.nav>
   );

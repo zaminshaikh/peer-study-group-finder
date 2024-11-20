@@ -116,67 +116,69 @@ app.post('/api/login', async (req, res, next) =>
 // Registers a user.
 // Also, creates a verification code and adds it as a field to the user, then sends the verification code to the user's email.
 app.post('/api/register', async (req, res, next) =>
-{ 
-  const { FirstName, LastName, DisplayName, Email, Password } = req.body;
-
-  const emptyArray = [];
-  var error = '';
-
-  const db = client.db('PeerGroupFinder');
-  const results = await db.collection('Users').find({Email:Email}).toArray();
-
-  var isEmailInUse = results.length > 0;
-  if(isEmailInUse){
-    error = "Email is already in use";
-    var ret = { UserId: -1, error: error };
-    res.status(200).json(ret);
-    return;
-  }
-
-  const verificationCode = Math.floor(Math.random() * 9000) + 1000;
-
-  const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
-
-  var result;
-  var user;
-  try
-  {
-    result = await db.collection('Users').insertOne(newUser);
-    user = await db.collection("Users").findOne({ _id : result.insertedId} );
-    
-    // DB might take too long to add UserId, so retry at most 10 times (with 100 ms timeouts) to give the DB time to add UserId.
-    for (let i = 0; i < 10; i++) {
-      if (user.UserId) {
-        console.log(`UserId found at ${i}.`);
-        break;
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 100));
-      user = await db.collection("Users").findOne({ _id : result.insertedId});
-    }
-
-  }
-  catch(e)
-  {
-    error = e.toString();
-    res.status(600).json({error:error});
-    return;
-  }
-
-  // const msg = {
-  //   to: Email, // Change to your recipient
-  //   from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
-  //   subject: 'PeerStudyGroupFinder: Email Verification',
-  //   text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
-  // }
+  { 
+    const { FirstName, LastName, DisplayName, Email, Password } = req.body;
   
-  // sendEmail(msg);
+    const emptyArray = [];
+    var error = '';
+  
+    const db = client.db('PeerGroupFinder');
+    const results = await db.collection('Users').find({Email:Email}).toArray();
+  
+    var isEmailInUse = results.length > 0;
+    if(isEmailInUse){
+      error = "Email is already in use";
+      var ret = { UserId: -1, error: error };
+      res.status(200).json(ret);
+      return;
+    }
+  
+    const verificationCode = Math.floor(Math.random() * 9000) + 1000;
+  
+    const newUser = {FirstName:FirstName,LastName:LastName,DisplayName:DisplayName,Email:Email,Password:Password,Group:emptyArray, VerificationCode:verificationCode};
+  
+    var result;
+    var user;
+    try
+    {
+      result = await db.collection('Users').insertOne(newUser);
+      user = await db.collection("Users").findOne({ _id : result.insertedId} );
+      
+      // DB might take too long to add UserId, so retry at most 10 times (with 100 ms timeouts) to give the DB time to add UserId.
+      for (let i = 0; i < 10; i++) {
+        if (user.UserId) {
+          console.log(`UserId found at ${i}.`);
+          break;
+        }
+  
+        await new Promise(resolve => setTimeout(resolve, 100));
+        user = await db.collection("Users").findOne({ _id : result.insertedId});
+      }
+  
+    }
+    catch(e)
+    {
+      error = e.toString();
+      res.status(600).json({error:error});
+      return;
+    }
+  
+    // const msg = {
+    //   to: Email, // Change to your recipient
+    //   from: 'peerstudygroupfinder@gmail.com', // Change to your verified sender
+    //   subject: 'PeerStudyGroupFinder: Email Verification',
+    //   text: `Here is your verification code: ${verificationCode}\n\nPlease do not share this code with anyone.`,
+    // }
+    
+    // sendEmail(msg);
+  
+    insertNewVerification(db, user, verificationCode, 'emailVerification');
+  
+    var ret = { UserId: user.UserId, error: error };
+    res.status(200).json(ret);
+  });
+  
 
-  insertNewVerification(db, user, verificationCode, 'emailVerification');
-
-  var ret = { UserId: user.UserId, error: error };
-  res.status(200).json(ret);
-});
 
 // Verifies that the user input the correct verification code.
 app.post('/api/verifyemail', async (req, res, next) => {
@@ -290,42 +292,79 @@ app.post('/api/changepassword', async (req, res, next) => {
   }
 });
 
-
-// Creates a group, adds user's id as the owner, adds user's id to the students array, and adds groupId to the user's ownerofgroup array and group array.
 app.post('/api/addgroup', async (req, res, next) =>
-{
-  // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
-  // outgoing: error
-	
-  const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
-
-  const Students = [Owner];
-  const newGroup = {Class:Class, Name:Name, Owner:Owner, Link:Link, Modality:Modality, Description:Description, Students:Students, Size:Size, Location:Location, MeetingTime:MeetingTime};
-  var error = '';
-
-  try
   {
-    const db = client.db('PeerGroupFinder');
-    const result = await db.collection('Groups').insertOne(newGroup);
-
-    const group = await db.collection('Groups').findOne({_id: result.insertedId});
-    const GroupId = group.GroupId;
-
-    const result2 = await db.collection('Users').updateOne(
-      {UserId:Owner},
-      {$addToSet: {OwnerOfGroup:GroupId, Group:GroupId}}
-    );
-
-  }
-  catch(e)
-  {
-    error = e.toString();
-  }
-
-  var ret = { error: error };
-  res.status(200).json(ret);
-});
-
+    // incoming: Class (code), Name, Owner, Link, Modality, Description, Size, Location, MeetingTime
+    // outgoing: error
+    
+    const { Class, Name, Owner, Link, Modality, Description, Size, Location, MeetingTime} = req.body;
+  
+    const Students = [Owner];
+    const newGroup = {
+      Class: Class, 
+      Name: Name, 
+      Owner: Owner, 
+      Link: Link, 
+      Modality: Modality, 
+      Description: Description, 
+      Students: Students, 
+      Size: Size, 
+      Location: Location, 
+      MeetingTime: MeetingTime
+    };
+    var error = '';
+  
+    try
+    {
+      const db = client.db('PeerGroupFinder');
+      const result = await db.collection('Groups').insertOne(newGroup);
+  
+      let group = null;
+      let retries = 0;
+      const maxRetries = 10;
+      
+      while (retries < maxRetries) {
+        group = await db.collection('Groups').findOne({_id: result.insertedId});
+        
+        if (group && group.GroupId) {
+          console.log(`GroupId found after ${retries} retries`);
+          break;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 100)); 
+        retries++;
+      }
+  
+      if (!group || !group.GroupId) {
+        throw new Error('Failed to get GroupId after maximum retries');
+      }
+  
+      const result2 = await db.collection('Users').updateOne(
+        {UserId: Owner},
+        {$addToSet: {
+          OwnerOfGroup: group.GroupId, 
+          Group: group.GroupId
+        }}
+      );
+  
+      if (result2.matchedCount === 0) {
+        throw new Error('User not found');
+      }
+  
+      if (result2.modifiedCount === 0) {
+        console.log('Group IDs already existed in user arrays');
+      }
+  
+      res.status(200).json({ error: '', groupId: group.GroupId });
+    }
+    catch(e)
+    {
+      error = e.toString();
+      console.error('Error in addgroup:', error);
+      res.status(500).json({ error: error });
+      return;
+    }
+  });
 
 app.get('/api/getgroupdetails', async (req, res, next) => {
   const { name } = req.query;
@@ -351,6 +390,27 @@ app.get('/api/getgroupdetails', async (req, res, next) => {
     groupId: group.GroupId,
     students: group.Students
   });
+});
+
+app.get('/api/getstudentinfo', async (req, res, next) => {
+  try {
+    const { studentId } = req.query;
+    const db = client.db('PeerGroupFinder');
+    
+    const student = await db.collection('Users').findOne({ UserId: parseInt(studentId) });
+    
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+    
+    res.status(200).json({
+      firstName: student.FirstName,
+      lastName: student.LastName
+    });
+  } catch (error) {
+    console.error('Error fetching student info:', error);
+    res.status(500).json({ error: 'An error occurred while fetching student info' });
+  }
 });
 
 app.post('/api/searchgroups', async (req, res, next) => 
