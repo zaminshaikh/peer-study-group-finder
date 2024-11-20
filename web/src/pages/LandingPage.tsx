@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import headshot_scott from "../imgs/headshot_scott.webp";
 import headshot_alex from "../imgs/headshot_alex.webp";
+import headshot_jason from "../imgs/headshot_jason.webp";
 import headshot_malak from "../imgs/headshot_malak.jpg";
 import headshot_zamin from "../imgs/headshot_zamin.webp";
 import headshot_zahrah from "../imgs/headshot_zahrah.jpg";
@@ -74,7 +75,7 @@ const LandingPage = () => {
     {
       title: "Jason Torres",
       role: "API/Database Engineer",
-      //image: headshot_jason,
+      image: headshot_jason,
       linkedin: "/donthaveone", // Changed to the new URL path
     },
   ];
